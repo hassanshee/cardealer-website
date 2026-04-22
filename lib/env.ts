@@ -14,13 +14,17 @@ export const env = {
   resendApiKey: process.env.RESEND_API_KEY || "",
   adminNotificationEmail:
     process.env.ADMIN_NOTIFICATION_EMAIL || "sales@example.com",
-  adminSuperEmail: process.env.ADMIN_SUPER_EMAIL || "asabatheif@gmail.com",
-  adminDefaultPassword:
-    process.env.ADMIN_DEFAULT_PASSWORD || "ChangeMe123!",
+  adminSuperEmail: process.env.ADMIN_SUPER_EMAIL || "",
+  adminDefaultPassword: process.env.ADMIN_DEFAULT_PASSWORD || "",
   demoAdminEmail: process.env.DEMO_ADMIN_EMAIL || "",
   demoAdminPassword: process.env.DEMO_ADMIN_PASSWORD || "",
   demoAdminSessionSecret: process.env.DEMO_ADMIN_SESSION_SECRET || "",
 };
+
+export const hasAdminSuperEmailConfig = Boolean(env.adminSuperEmail);
+export const hasAdminDefaultPasswordConfig = Boolean(env.adminDefaultPassword);
+export const hasAdminManagementConfig =
+  hasAdminSuperEmailConfig && hasAdminDefaultPasswordConfig;
 
 export const hasSupabaseConfig = Boolean(
   env.supabaseUrl && env.supabasePublishableKey,

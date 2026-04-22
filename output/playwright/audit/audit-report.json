@@ -1,0 +1,237 @@
+{
+  "desktop": [
+    {
+      "name": "home",
+      "route": "/",
+      "status": 200,
+      "title": "Cars for Sale in Mombasa | Ocean Motors",
+      "url": "http://localhost:3101/",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "inventory",
+      "route": "/inventory",
+      "status": 200,
+      "title": "Inventory | Ocean Motors",
+      "url": "http://localhost:3101/inventory",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "inventory-new",
+      "route": "/inventory/new",
+      "status": 200,
+      "title": "New Cars | Ocean Motors",
+      "url": "http://localhost:3101/inventory/new",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "inventory-used",
+      "route": "/inventory/used",
+      "status": 200,
+      "title": "Used Cars | Ocean Motors",
+      "url": "http://localhost:3101/inventory/used",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "inventory-imported",
+      "route": "/inventory/imported",
+      "status": 200,
+      "title": "Imported Units | Ocean Motors",
+      "url": "http://localhost:3101/inventory/imported",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "inventory-traded-in",
+      "route": "/inventory/traded-in",
+      "status": 200,
+      "title": "Traded-in Cars | Ocean Motors",
+      "url": "http://localhost:3101/inventory/traded-in",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "car-detail",
+      "route": "/cars/2018-range-rover-vogue",
+      "status": 200,
+      "title": "2018 Land Rover Range Rover Vogue for Sale in Mombasa | Ocean Motors",
+      "url": "http://localhost:3101/cars/2018-range-rover-vogue",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "car-viewing",
+      "route": "/cars/2018-range-rover-vogue?intent=viewing",
+      "status": 200,
+      "title": "2018 Land Rover Range Rover Vogue for Sale in Mombasa | Ocean Motors",
+      "url": "http://localhost:3101/cars/2018-range-rover-vogue?intent=viewing",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "about",
+      "route": "/about",
+      "status": 200,
+      "title": "About | Ocean Motors",
+      "url": "http://localhost:3101/about",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "financing",
+      "route": "/financing",
+      "status": 200,
+      "title": "Financing | Ocean Motors",
+      "url": "http://localhost:3101/financing",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "trade-in",
+      "route": "/trade-in",
+      "status": 200,
+      "title": "Trade-In | Ocean Motors",
+      "url": "http://localhost:3101/trade-in",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "contact",
+      "route": "/contact",
+      "status": 200,
+      "title": "Contact | Ocean Motors",
+      "url": "http://localhost:3101/contact",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "admin-login",
+      "route": "/admin/login",
+      "status": 200,
+      "title": "Sign in | Ocean Motors Admin",
+      "url": "http://localhost:3101/admin/login",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "admin-reset-password",
+      "route": "/admin/reset-password",
+      "status": 404,
+      "title": "404: This page could not be found.",
+      "url": "http://localhost:3101/admin/reset-password",
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    }
+  ],
+  "mobile": [
+    {
+      "name": "mobile-home",
+      "route": "/",
+      "status": 200,
+      "title": "Cars for Sale in Mombasa | Ocean Motors",
+      "url": "http://localhost:3101/",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "mobile-inventory",
+      "route": "/inventory",
+      "status": 200,
+      "title": "Inventory | Ocean Motors",
+      "url": "http://localhost:3101/inventory",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "mobile-car-detail",
+      "route": "/cars/2018-range-rover-vogue",
+      "status": 200,
+      "title": "2018 Land Rover Range Rover Vogue for Sale in Mombasa | Ocean Motors",
+      "url": "http://localhost:3101/cars/2018-range-rover-vogue",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "mobile-financing",
+      "route": "/financing",
+      "status": 200,
+      "title": "Financing | Ocean Motors",
+      "url": "http://localhost:3101/financing",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "mobile-trade-in",
+      "route": "/trade-in",
+      "status": 200,
+      "title": "Trade-In | Ocean Motors",
+      "url": "http://localhost:3101/trade-in",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "mobile-contact",
+      "route": "/contact",
+      "status": 200,
+      "title": "Contact | Ocean Motors",
+      "url": "http://localhost:3101/contact",
+      "pageErrors": [],
+      "consoleErrors": []
+    }
+  ],
+  "admin": [
+    {
+      "name": "admin-vehicles",
+      "url": "http://localhost:3101/admin/vehicles",
+      "pageErrors": [],
+      "consoleErrors": []
+    },
+    {
+      "name": "admin-vehicles-new",
+      "url": "http://localhost:3101/admin/vehicles/new",
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "name": "admin-leads",
+      "url": "http://localhost:3101/admin/leads",
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "name": "admin-admins",
+      "url": "http://localhost:3101/admin/admins",
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    }
+  ],
+  "errors": []
+}

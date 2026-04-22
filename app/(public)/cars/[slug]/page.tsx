@@ -429,7 +429,7 @@ export default async function VehicleDetailPage({
               {similarVehicles.length ? (
                 <div className="mt-6 space-y-5">
                   <h3 className="text-xl font-semibold text-text-primary">Similar vehicles</h3>
-                  <div className="mt-3 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                  <div className="mt-3 grid gap-6 md:grid-cols-2">
                     {similarVehicles.map((item) => (
                       <VehicleCard key={item.id} vehicle={item} />
                     ))}
@@ -445,13 +445,13 @@ export default async function VehicleDetailPage({
                 <p className="mt-2 text-sm text-text-secondary">Talk to our sales team for availability, finance options, or to request more photos.</p>
 
                 <div className="mt-4 grid gap-3">
-                  <Button asChild variant="whatsapp" className="h-12 rounded-2xl" size="md">
+                  <Button asChild variant="whatsapp" className="h-12 rounded-2xl">
                     <a href={whatsappUrl} target="_blank" rel="noreferrer" aria-label="Message on WhatsApp">
                       <WhatsAppIcon className="mr-2 size-[1rem]" aria-hidden />
                       Message
                     </a>
                   </Button>
-                  <Button asChild variant="secondary" className="h-12 rounded-2xl" size="md">
+                  <Button asChild variant="secondary" className="h-12 rounded-2xl">
                     <a href={siteConfig.phoneHref} aria-label="Call sales">
                       <Phone className="mr-2 size-[1rem]" aria-hidden />
                       Call

@@ -1,6 +1,6 @@
 import { AdminNavigation } from "@/components/admin/admin-navigation";
 import type { AdminSession } from "@/types/dealership";
-import { env } from "@/lib/env";
+import { env, hasAdminSuperEmailConfig } from "@/lib/env";
 
 export function AdminShell({
   session,
@@ -10,6 +10,7 @@ export function AdminShell({
   children: React.ReactNode;
 }) {
   const canManageAdmins =
+    hasAdminSuperEmailConfig &&
     session.email.toLowerCase() === env.adminSuperEmail.toLowerCase();
 
   return (

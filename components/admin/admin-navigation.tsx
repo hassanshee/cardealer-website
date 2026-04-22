@@ -28,6 +28,12 @@ const baseNavItems = [
   },
 ] as const;
 
+type AdminNavItem = {
+  href: string;
+  label: string;
+  description: string;
+};
+
 function getCurrentPageLabel(pathname: string) {
   if (pathname.startsWith("/admin/leads")) {
     return "Lead inbox";
@@ -105,11 +111,7 @@ function NavigationPanel({
 }: {
   pathname: string;
   session: AdminSession;
-  navItems: Array<{
-    href: string;
-    label: string;
-    description: string;
-  }>;
+  navItems: ReadonlyArray<AdminNavItem>;
   onNavigate?: () => void;
 }) {
   return (
@@ -185,8 +187,9 @@ export function AdminNavigation({
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const pageLabel = useMemo(() => getCurrentPageLabel(pathname), [pathname]);
+  const showAdminsLink = canManageAdmins || session.mode === "demo";
   const navItems = useMemo(() => {
-    if (!canManageAdmins) {
+    if (!showAdminsLink) {
       return baseNavItems;
     }
 
@@ -198,9 +201,8 @@ export function AdminNavigation({
         description: "Manage admin access and passwords.",
       },
     ];
-  }, [canManageAdmins]);
+  }, [showAdminsLink]);
   const mobileNavRef = useRef<HTMLDivElement>(null);
-  const mobileCloseRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!mobileOpen) {
@@ -247,7 +249,7 @@ export function AdminNavigation({
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    mobileCloseRef.current?.focus();
+    first?.focus();
 
     return () => {
       document.body.style.overflow = previousOverflow;
@@ -317,7 +319,6 @@ export function AdminNavigation({
                 <p className="text-sm font-semibold text-stone-950">{pageLabel}</p>
               </div>
               <Button
-                ref={mobileCloseRef}
                 type="button"
                 variant="ghost"
                 className="rounded-full px-3 py-2"

@@ -7,6 +7,8 @@ import { requireAdminSession, signInDemoAdmin, signOutAdmin } from "@/lib/auth";
 import {
   allowDemoAdmin,
   env,
+  hasAdminManagementConfig,
+  hasAdminSuperEmailConfig,
   hasCloudinaryConfig,
   hasSupabaseConfig,
   hasSupabaseSecretConfig,
@@ -67,7 +69,10 @@ function actionSuccess(message: string, redirectTo?: string) {
 class VehicleSaveActionError extends Error {}
 
 function isSuperAdmin(session: AdminSession) {
-  return session.email.toLowerCase() === env.adminSuperEmail.toLowerCase();
+  return (
+    hasAdminSuperEmailConfig &&
+    session.email.toLowerCase() === env.adminSuperEmail.toLowerCase()
+  );
 }
 
 function normalizeEmail(value: string) {
@@ -538,6 +543,12 @@ export async function createAdminAccountAction(
     return actionFailure("Only the super admin can manage admin access.");
   }
 
+  if (!hasAdminManagementConfig) {
+    return actionFailure(
+      "Set ADMIN_SUPER_EMAIL and ADMIN_DEFAULT_PASSWORD to enable admin management.",
+    );
+  }
+
   if (!hasSupabaseSecretConfig) {
     return actionFailure("Supabase service key is missing. Add it to enable admin management.");
   }
@@ -647,6 +658,10 @@ export async function disableAdminAccountAction(
     return actionFailure("Only the super admin can manage admin access.");
   }
 
+  if (!hasAdminSuperEmailConfig) {
+    return actionFailure("Set ADMIN_SUPER_EMAIL to enable admin management.");
+  }
+
   if (!hasSupabaseSecretConfig) {
     return actionFailure("Supabase service key is missing. Add it to manage admin access.");
   }
@@ -693,6 +708,10 @@ export async function enableAdminAccountAction(
     return actionFailure("Only the super admin can manage admin access.");
   }
 
+  if (!hasAdminSuperEmailConfig) {
+    return actionFailure("Set ADMIN_SUPER_EMAIL to enable admin management.");
+  }
+
   if (!hasSupabaseSecretConfig) {
     return actionFailure("Supabase service key is missing. Add it to manage admin access.");
   }
@@ -733,6 +752,10 @@ export async function removeAdminAccountAction(
 
   if (!isSuperAdmin(session)) {
     return actionFailure("Only the super admin can manage admin access.");
+  }
+
+  if (!hasAdminSuperEmailConfig) {
+    return actionFailure("Set ADMIN_SUPER_EMAIL to enable admin management.");
   }
 
   if (!hasSupabaseSecretConfig) {

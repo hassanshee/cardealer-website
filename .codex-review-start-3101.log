@@ -1,0 +1,33 @@
+
+> cardealer-website@0.1.0 start
+> next start --hostname localhost --port 3101
+
+▲ Next.js 16.1.6
+- Local:         http://localhost:3101
+- Network:       http://localhost:3101
+
+✓ Starting...
+✓ Ready in 1168ms
+[cloudinary] Unable to hydrate gallery for CAR-004. No Cloudinary images were found for stock code "CAR-004". Tried folders: CAR-004, car-004, cars/CAR-004, cars/car-004.
+[cloudinary] Unable to hydrate gallery for CAR-003. No Cloudinary images were found for stock code "CAR-003". Tried folders: CAR-003, car-003, cars/CAR-003, cars/car-003.
+[cloudinary] Unable to hydrate gallery for CAR-007. No Cloudinary images were found for stock code "CAR-007". Tried folders: CAR-007, car-007, cars/CAR-007, cars/car-007.
+[cloudinary] Unable to hydrate gallery for CAR-012. No Cloudinary images were found for stock code "CAR-012". Tried folders: CAR-012, car-012, cars/CAR-012, cars/car-012.
+[cloudinary] Unable to hydrate gallery for CAR-009. No Cloudinary images were found for stock code "CAR-009". Tried folders: CAR-009, car-009, cars/CAR-009, cars/car-009.
+[cloudinary] Unable to hydrate gallery for CAR-016. No Cloudinary images were found for stock code "CAR-016". Tried folders: CAR-016, car-016, cars/CAR-016, cars/car-016.
+[cloudinary] Unable to hydrate gallery for CAR-013. No Cloudinary images were found for stock code "CAR-013". Tried folders: CAR-013, car-013, cars/CAR-013, cars/car-013.
+[cloudinary] Unable to hydrate gallery for CAR-003. No Cloudinary images were found for stock code "CAR-003". Tried folders: CAR-003, car-003, cars/CAR-003, cars/car-003.
+[cloudinary] Unable to hydrate gallery for CAR-015. No Cloudinary images were found for stock code "CAR-015". Tried folders: CAR-015, car-015, cars/CAR-015, cars/car-015.
+[cloudinary] Unable to hydrate gallery for CAR-007. No Cloudinary images were found for stock code "CAR-007". Tried folders: CAR-007, car-007, cars/CAR-007, cars/car-007.
+[cloudinary] Unable to hydrate gallery for CAR-004. No Cloudinary images were found for stock code "CAR-004". Tried folders: CAR-004, car-004, cars/CAR-004, cars/car-004.
+[cloudinary] Unable to hydrate gallery for CAR-005. No Cloudinary images were found for stock code "CAR-005". Tried folders: CAR-005, car-005, cars/CAR-005, cars/car-005.
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_g9gkly.jpg 404
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_lyugoe.jpg 404
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_fyx2rf.jpg 404
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_qnxg0i.jpg 404
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_vcuu82.jpg 404
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_oivlbh.jpg 404
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_tt0osk.jpg 404
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_tgqbta.jpg 404
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_tub58n.jpg 404
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_bmljfj.jpg 404
+⨯ upstream image response failed for https://res.cloudinary.com/playwright-cloud/image/upload/1_sw86qo.jpg 404

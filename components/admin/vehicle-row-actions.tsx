@@ -43,14 +43,19 @@ export function VehicleRowActions({
     deleteVehicleAction,
     initialState,
   );
+  const hasSuccessfulAction =
+    featureState.success || statusState.success || deleteState.success;
+
+  function closeActionMenu() {
+    setMenuOpen(false);
+    setConfirmDelete(false);
+  }
 
   useEffect(() => {
-    if (featureState.success || statusState.success || deleteState.success) {
-      setMenuOpen(false);
-      setConfirmDelete(false);
+    if (hasSuccessfulAction) {
       router.refresh();
     }
-  }, [deleteState, featureState, router, statusState]);
+  }, [hasSuccessfulAction, router]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -109,6 +114,7 @@ export function VehicleRowActions({
                   size="sm"
                   variant="ghost"
                   className="w-full justify-start rounded-2xl"
+                  onClick={closeActionMenu}
                 >
                   <Star className="size-4" />
                   {featured ? "Remove featured" : "Mark featured"}
@@ -123,6 +129,7 @@ export function VehicleRowActions({
                     size="sm"
                     variant="ghost"
                     className="w-full justify-start rounded-2xl"
+                    onClick={closeActionMenu}
                   >
                     Publish listing
                   </SubmitButton>
@@ -135,6 +142,7 @@ export function VehicleRowActions({
                     size="sm"
                     variant="ghost"
                     className="w-full justify-start rounded-2xl"
+                    onClick={closeActionMenu}
                   >
                     Move back to unpublished
                   </SubmitButton>
@@ -149,6 +157,7 @@ export function VehicleRowActions({
                     size="sm"
                     variant="ghost"
                     className="w-full justify-start rounded-2xl"
+                    onClick={closeActionMenu}
                   >
                     Mark as sold
                   </SubmitButton>
@@ -186,6 +195,7 @@ export function VehicleRowActions({
                       <SubmitButton
                         size="sm"
                         className="bg-red-600 px-3 py-2 hover:bg-red-700"
+                        onClick={closeActionMenu}
                       >
                         Confirm delete
                       </SubmitButton>

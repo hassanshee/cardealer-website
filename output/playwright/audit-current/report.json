@@ -1,0 +1,146 @@
+{
+  "desktop": [
+    {
+      "name": "home",
+      "route": "/",
+      "status": 200,
+      "url": "http://localhost:3000/",
+      "failures": []
+    },
+    {
+      "name": "inventory",
+      "route": "/inventory",
+      "status": 200,
+      "url": "http://localhost:3000/inventory",
+      "failures": []
+    },
+    {
+      "name": "inventory-new",
+      "route": "/inventory/new",
+      "status": 200,
+      "url": "http://localhost:3000/inventory/new",
+      "failures": []
+    },
+    {
+      "name": "inventory-used",
+      "route": "/inventory/used",
+      "status": 200,
+      "url": "http://localhost:3000/inventory/used",
+      "failures": []
+    },
+    {
+      "name": "inventory-imported",
+      "route": "/inventory/imported",
+      "status": 200,
+      "url": "http://localhost:3000/inventory/imported",
+      "failures": []
+    },
+    {
+      "name": "inventory-traded-in",
+      "route": "/inventory/traded-in",
+      "status": 200,
+      "url": "http://localhost:3000/inventory/traded-in",
+      "failures": []
+    },
+    {
+      "name": "car-detail",
+      "route": "/cars/2018-range-rover-vogue",
+      "status": 200,
+      "url": "http://localhost:3000/cars/2018-range-rover-vogue",
+      "failures": []
+    },
+    {
+      "name": "car-viewing",
+      "route": "/cars/2018-range-rover-vogue?intent=viewing",
+      "status": 200,
+      "url": "http://localhost:3000/cars/2018-range-rover-vogue?intent=viewing",
+      "failures": []
+    },
+    {
+      "name": "about",
+      "route": "/about",
+      "status": 200,
+      "url": "http://localhost:3000/about",
+      "failures": []
+    },
+    {
+      "name": "financing",
+      "route": "/financing",
+      "status": 200,
+      "url": "http://localhost:3000/financing",
+      "failures": []
+    },
+    {
+      "name": "trade-in",
+      "route": "/trade-in",
+      "status": 200,
+      "url": "http://localhost:3000/trade-in",
+      "failures": []
+    },
+    {
+      "name": "contact",
+      "route": "/contact",
+      "status": 200,
+      "url": "http://localhost:3000/contact",
+      "failures": []
+    },
+    {
+      "name": "admin-login",
+      "route": "/admin/login",
+      "status": 200,
+      "url": "http://localhost:3000/admin/login",
+      "failures": []
+    },
+    {
+      "name": "admin-reset-password",
+      "route": "/admin/reset-password",
+      "status": 200,
+      "url": "http://localhost:3000/admin/login",
+      "failures": []
+    }
+  ],
+  "mobile": [
+    {
+      "name": "mobile-home",
+      "route": "/",
+      "status": 200,
+      "url": "http://localhost:3000/",
+      "failures": []
+    },
+    {
+      "name": "mobile-inventory",
+      "route": "/inventory",
+      "status": 200,
+      "url": "http://localhost:3000/inventory",
+      "failures": []
+    },
+    {
+      "name": "mobile-car-detail",
+      "route": "/cars/2018-range-rover-vogue",
+      "status": 200,
+      "url": "http://localhost:3000/cars/2018-range-rover-vogue",
+      "failures": []
+    },
+    {
+      "name": "mobile-financing",
+      "route": "/financing",
+      "status": 200,
+      "url": "http://localhost:3000/financing",
+      "failures": []
+    },
+    {
+      "name": "mobile-trade-in",
+      "route": "/trade-in",
+      "status": 200,
+      "url": "http://localhost:3000/trade-in",
+      "failures": []
+    },
+    {
+      "name": "mobile-contact",
+      "route": "/contact",
+      "status": 200,
+      "url": "http://localhost:3000/contact",
+      "failures": []
+    }
+  ]
+}

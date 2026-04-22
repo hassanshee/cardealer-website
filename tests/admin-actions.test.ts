@@ -37,9 +37,15 @@ vi.mock("@/lib/auth", () => ({
 
 vi.mock("@/lib/env", () => ({
   allowDemoAdmin: true,
+  hasAdminManagementConfig: true,
+  hasAdminSuperEmailConfig: true,
   hasSupabaseConfig: true,
   get hasCloudinaryConfig() {
     return mocks.envState.hasCloudinaryConfig;
+  },
+  env: {
+    adminDefaultPassword: "StrongTempPassword123!",
+    adminSuperEmail: "owner@example.com",
   },
 }));
 

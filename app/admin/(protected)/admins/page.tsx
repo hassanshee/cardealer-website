@@ -6,7 +6,12 @@ import { AdminUnavailableState } from "@/components/admin/admin-unavailable-stat
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { requireAdminSession } from "@/lib/auth";
-import { env, hasSupabaseSecretConfig } from "@/lib/env";
+import {
+  env,
+  hasAdminDefaultPasswordConfig,
+  hasAdminSuperEmailConfig,
+  hasSupabaseSecretConfig,
+} from "@/lib/env";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -109,6 +114,28 @@ export default async function AdminAdminsPage() {
     );
   }
 
+  if (!hasAdminSuperEmailConfig) {
+    return (
+      <AdminUnavailableState
+        title="Admins are unavailable"
+        description="Set ADMIN_SUPER_EMAIL to enable admin access management."
+        retryHref="/admin/admins"
+        backHref="/admin/vehicles"
+      />
+    );
+  }
+
+  if (!hasAdminDefaultPasswordConfig) {
+    return (
+      <AdminUnavailableState
+        title="Admins are unavailable"
+        description="Set ADMIN_DEFAULT_PASSWORD to enable admin account creation."
+        retryHref="/admin/admins"
+        backHref="/admin/vehicles"
+      />
+    );
+  }
+
   const isSuperAdmin =
     session.email.toLowerCase() === env.adminSuperEmail.toLowerCase();
 
@@ -194,10 +221,8 @@ export default async function AdminAdminsPage() {
     );
   }
 
-  const now = Date.now();
   const admins = adminRows.map((admin) => {
     const bannedUntil = bannedLookup.get(String(admin.user_id)) ?? null;
-    const bannedTime = bannedUntil ? new Date(bannedUntil).getTime() : null;
 
     return {
       userId: String(admin.user_id),
@@ -206,7 +231,7 @@ export default async function AdminAdminsPage() {
       isCurrent: session.userId === admin.user_id,
       isSuper:
         admin.email?.toLowerCase() === env.adminSuperEmail.toLowerCase(),
-      isDisabled: Boolean(bannedTime && !Number.isNaN(bannedTime) && bannedTime > now),
+      isDisabled: Boolean(bannedUntil),
       bannedUntil,
     };
   });
