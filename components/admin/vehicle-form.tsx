@@ -1198,8 +1198,10 @@ export function VehicleForm({
 
       const nextPendingFiles = Array.from(files).map((file) => {
         validateVehicleImageUpload(file);
-        const pendingFileId = crypto.randomUUID();
-
+const pendingFileId =
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
         return {
           id: pendingFileId,
           file,

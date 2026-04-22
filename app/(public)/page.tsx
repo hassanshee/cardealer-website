@@ -344,7 +344,7 @@ export default async function Home() {
         <section className="relative flex min-h-[20.35rem] w-full flex-col justify-center overflow-hidden pb-12 pt-7 md:min-h-[29rem] md:pb-5 md:pt-12 lg:min-h-[31rem] lg:pb-6 lg:pt-16">
           <div className="absolute inset-0 z-0">
             <Image
-              src="https://res.cloudinary.com/dlyrnhpcn/image/upload/v1773413283/HERO1_z3ovbz.png"
+              src="https://res.cloudinary.com/dlyrnhpcn/image/upload/v1776860439/ChatGPT_Image_Apr_22_2026_03_17_49_PM_tplsjn.png"
               alt="Vehicles available at Ocean Motors in Mombasa"
               fill
               priority
