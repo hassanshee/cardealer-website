@@ -156,20 +156,6 @@ function buildMobileStatusBadges(vehicle: VehicleRecord) {
   ];
 }
 
-function buildQuickSpecs(vehicle: VehicleRecord) {
-  return [
-    { label: "Year", value: String(vehicle.year) },
-    {
-      label: "Mileage",
-      value: vehicle.mileage > 0 ? formatMileage(vehicle.mileage) : "On request",
-    },
-    { label: "Transmission", value: vehicle.transmission },
-    { label: "Fuel", value: vehicle.fuelType },
-    { label: "Location", value: vehicle.location?.name || "Mombasa showroom" },
-    { label: "Status", value: "Available now" },
-  ];
-}
-
 function buildHeroFacts(vehicle: VehicleRecord): HeroFact[] {
   return [
     { icon: Calendar, label: "Year", value: String(vehicle.year) },
@@ -644,7 +630,6 @@ export default async function VehicleDetailPage({
     siteConfig.whatsappNumber,
   );
   const shareUrl = absoluteUrl(vehiclePath);
-  const quickSpecs = buildQuickSpecs(vehicle);
   const heroFacts = buildHeroFacts(vehicle);
   const detailBadges = buildStatusBadges(vehicle);
   const mobileBadges = buildMobileStatusBadges(vehicle);

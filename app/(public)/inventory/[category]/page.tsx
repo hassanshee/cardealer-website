@@ -98,7 +98,7 @@ export default async function InventoryCategoryPage({
       <JsonLd data={breadcrumbJsonLd} />
       <JsonLd data={itemListJsonLd} />
       <section className="section-shell">
-        <div className="container-shell space-y-10">
+        <div className="container-shell space-y-6 sm:space-y-10">
           <SectionHeading
             as="h1"
             eyebrow="Category inventory"

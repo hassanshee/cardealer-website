@@ -341,7 +341,7 @@ export default async function Home() {
       <JsonLd data={breadcrumbJsonLd} />
 
       <main className="homepage-flow">
-        <section className="relative flex min-h-[20.35rem] w-full flex-col justify-center overflow-hidden pb-12 pt-7 md:min-h-[29rem] md:pb-5 md:pt-12 lg:min-h-[31rem] lg:pb-6 lg:pt-16">
+        <section className="relative flex min-h-[19rem] w-full flex-col justify-center overflow-hidden pb-10 pt-4 md:min-h-[29rem] md:pb-5 md:pt-12 lg:min-h-[31rem] lg:pb-6 lg:pt-16">
           <div className="absolute inset-0 z-0">
             <Image
               src="https://res.cloudinary.com/dlyrnhpcn/image/upload/v1776860439/ChatGPT_Image_Apr_22_2026_03_17_49_PM_tplsjn.png"
@@ -387,7 +387,7 @@ export default async function Home() {
               </div>
 
             </div>
-            <div className="relative mt-5 hidden w-full max-w-4xl animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-150 md:mx-0 md:mt-5 md:block lg:mt-5">
+            <div className="relative mt-4 hidden w-full max-w-4xl animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-150 md:mx-0 md:mt-5 md:block lg:mt-5">
               <HeroSearchPanel inventoryMakes={inventoryMakes} />
               <HeroTrustRow className="mt-2.5" />
             </div>
@@ -395,7 +395,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <div className="relative z-30 -mt-8 md:hidden">
+        <div className="relative z-30 -mt-6 md:hidden">
           <div className="container-shell px-1">
             <HeroSearchPanel
               inventoryMakes={inventoryMakes}
@@ -405,7 +405,7 @@ export default async function Home() {
           </div>
         </div>
 
-        <section className="section-shell pt-6 md:pt-16">
+        <section className="section-shell pt-4 md:pt-16">
           <div className="container-shell space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="space-y-3">
