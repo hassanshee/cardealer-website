@@ -13,7 +13,7 @@ function buildVehicleFormData() {
   formData.set("mileage", "42000");
   formData.set("transmission", "Automatic");
   formData.set("fuelType", "Diesel");
-  formData.set("status", "published");
+  formData.set("status", "draft");
   formData.set("stockCategory", "used");
   formData.set(
     "description",
@@ -112,6 +112,113 @@ describe("mapVehicleFormData", () => {
 
     expect(result.stockCode).toBe("KDL-777");
     expect(result.slug).toBe("2020-toyota-prado-signature");
+  });
+
+  it("accepts comma-formatted Kenyan price and mileage values", () => {
+    const formData = buildVehicleFormData();
+    formData.set("price", "2,790,000");
+    formData.set("mileage", "85,000");
+
+    const result = mapVehicleFormData(formData);
+
+    expect(result.price).toBe(2790000);
+    expect(result.mileage).toBe(85000);
+  });
+
+  it("rejects blank numeric fields instead of saving them as zero", () => {
+    const formData = buildVehicleFormData();
+    formData.set("price", "");
+    formData.set("mileage", "");
+
+    let thrownError: {
+      flatten: () => { fieldErrors: Record<string, string[] | undefined> };
+    } | null = null;
+
+    try {
+      mapVehicleFormData(formData);
+    } catch (error) {
+      thrownError = error as {
+        flatten: () => { fieldErrors: Record<string, string[] | undefined> };
+      };
+    }
+
+    expect(thrownError).not.toBeNull();
+
+    const fieldErrors = thrownError!.flatten().fieldErrors;
+    expect(fieldErrors.price).toBeDefined();
+    expect(fieldErrors.mileage).toBeDefined();
+  });
+
+  it("derives the listing title from core details when the title field is empty", () => {
+    const formData = buildVehicleFormData();
+    formData.set("title", "");
+
+    const result = mapVehicleFormData(formData);
+
+    expect(result.title).toBe("2020 Toyota Prado");
+    expect(result.slug).toBe("2020-toyota-prado");
+  });
+
+  it("requires an image before publishing a listing", () => {
+    const formData = buildVehicleFormData();
+    formData.set("status", "published");
+    formData.set("imagesJson", JSON.stringify([]));
+
+    let thrownError: {
+      flatten: () => { fieldErrors: Record<string, string[] | undefined> };
+    } | null = null;
+
+    try {
+      mapVehicleFormData(formData);
+    } catch (error) {
+      thrownError = error as {
+        flatten: () => { fieldErrors: Record<string, string[] | undefined> };
+      };
+    }
+
+    expect(thrownError).not.toBeNull();
+    expect(thrownError!.flatten().fieldErrors.images).toEqual([
+      "Add at least one image before publishing.",
+    ]);
+  });
+
+  it("allows draft listings to be saved without images", () => {
+    const formData = buildVehicleFormData();
+    formData.set("status", "draft");
+    formData.set("imagesJson", JSON.stringify([]));
+
+    const result = mapVehicleFormData(formData);
+
+    expect(result.status).toBe("draft");
+    expect(result.images).toEqual([]);
+  });
+
+  it("rejects unsupported select values from stale or tampered forms", () => {
+    const formData = buildVehicleFormData();
+    formData.set("condition", "Mint");
+    formData.set("transmission", "Tiptronic");
+    formData.set("fuelType", "Solar");
+
+    let thrownError: {
+      flatten: () => { fieldErrors: Record<string, string[] | undefined> };
+    } | null = null;
+
+    try {
+      mapVehicleFormData(formData);
+    } catch (error) {
+      thrownError = error as {
+        flatten: () => { fieldErrors: Record<string, string[] | undefined> };
+      };
+    }
+
+    expect(thrownError).not.toBeNull();
+
+    const fieldErrors = thrownError!.flatten().fieldErrors;
+    expect(fieldErrors.condition).toEqual(["Select a supported condition."]);
+    expect(fieldErrors.transmission).toEqual([
+      "Select a supported transmission.",
+    ]);
+    expect(fieldErrors.fuelType).toEqual(["Select a supported fuel type."]);
   });
 
   it("does not surface a stock-code error when the source fields are invalid", () => {

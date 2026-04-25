@@ -38,6 +38,7 @@ import type {
   LeadInboxSourceType,
   LeadWorkflowStatus,
   VehicleFormInput,
+  VehicleImageInput,
 } from "@/types/dealership";
 
 function validationErrorState(error: {
@@ -58,11 +59,16 @@ function actionFailure(message: string, fieldErrors?: Record<string, string[]>) 
   } satisfies ActionState;
 }
 
-function actionSuccess(message: string, redirectTo?: string) {
+function actionSuccess(
+  message: string,
+  redirectTo?: string,
+  savedImages?: VehicleImageInput[],
+) {
   return {
     success: true,
     message,
     ...(redirectTo ? { redirectTo } : {}),
+    ...(savedImages ? { savedImages } : {}),
   } satisfies ActionState;
 }
 
@@ -242,6 +248,20 @@ function revalidateVehiclePaths(slug?: string) {
   }
 }
 
+function mapSavedVehicleImages(
+  images: Awaited<ReturnType<typeof saveVehicle>>["images"] | undefined,
+): VehicleImageInput[] {
+  return (images || []).map((image) => ({
+    altText: image.altText,
+    cloudinaryPublicId: image.cloudinaryPublicId,
+    imageUrl: image.imageUrl,
+    isHero: image.isHero,
+    sortOrder: image.sortOrder,
+    sourceUrl: null,
+    uploadState: "uploaded",
+  }));
+}
+
 export async function cleanupUploadedVehicleImagesAction(publicIds: string[]) {
   await requireAdminSession();
   await cleanupUploadedVehicleImages(publicIds);
@@ -384,7 +404,11 @@ export async function saveVehicleAction(
   revalidatePath("/admin/vehicles");
   revalidatePath(`/admin/vehicles/${vehicle.id}`);
   return isEditing
-    ? actionSuccess("Vehicle saved successfully.")
+    ? actionSuccess(
+        "Vehicle saved successfully.",
+        undefined,
+        mapSavedVehicleImages(vehicle.images),
+      )
     : actionSuccess(
         "Vehicle created successfully.",
         `/admin/vehicles/${vehicle.id}?saved=1`,

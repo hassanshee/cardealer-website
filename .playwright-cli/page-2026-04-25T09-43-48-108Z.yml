@@ -1,0 +1,137 @@
+- main [ref=e5]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - button "Return to inventory" [ref=e8]:
+        - img [ref=e9]
+        - text: Return to inventory
+      - img [ref=e11]
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - heading "Create vehicle" [level=2] [ref=e16]
+        - paragraph [ref=e17]: Paste a dealer message, add photos, then review the essentials.
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - img [ref=e20]
+          - generic [ref=e22]: Ready to create
+        - generic [ref=e23]: 9 missing
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: Quick Fill
+          - generic [ref=e27]: WhatsApp
+        - generic [ref=e29]:
+          - generic [ref=e30]: Dealer message
+          - textbox "Dealer message" [ref=e31]:
+            - /placeholder: Toyota Harrier 2017 2.5L petrol, auto, 83k km, Ksh 3.4M, Mombasa...
+        - generic [ref=e32]:
+          - button "Parse & fill" [ref=e33]
+          - button "Clear paste" [ref=e34]
+      - generic [ref=e35]:
+        - heading "Basic Details" [level=3] [ref=e37]
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - generic [ref=e40]: Make*
+            - combobox "Make" [ref=e41]
+          - generic [ref=e42]:
+            - generic [ref=e43]: Model*
+            - textbox "Model" [ref=e44]:
+              - /placeholder: Land Cruiser V8
+          - generic [ref=e45]:
+            - generic [ref=e46]:
+              - generic [ref=e47]: Year*
+              - spinbutton "Year" [ref=e48]
+            - generic [ref=e49]:
+              - generic [ref=e50]: Location
+              - combobox "Location" [ref=e51]:
+                - option "Select" [selected]
+                - option "Mombasa"
+                - option "Mombasa"
+      - generic [ref=e52]:
+        - heading "Price" [level=3] [ref=e54]
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - generic [ref=e57]: Price (Ksh)*
+            - textbox "Price (Ksh)" [ref=e58]:
+              - /placeholder: 2,790,000
+          - generic [ref=e59]:
+            - generic [ref=e60]: Condition*
+            - combobox "Condition" [ref=e61]:
+              - option "Select condition" [selected]
+              - option "Foreign used"
+              - option "Locally used"
+              - option "Brand new"
+              - option "Trade-in unit"
+              - option "Very clean"
+              - option "Clean unit"
+              - option "Accident free, original paint"
+              - option "New registration"
+              - option "Traded-in / Very clean"
+              - option "Traded-in / Clean unit"
+          - generic [ref=e62] [cursor=pointer]:
+            - checkbox "Price negotiable" [ref=e63]
+            - text: Price negotiable
+      - generic [ref=e64]:
+        - heading "Specs" [level=3] [ref=e66]
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - generic [ref=e69]: Mileage (km)*
+            - textbox "Mileage (km)" [ref=e70]:
+              - /placeholder: "85000"
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - generic [ref=e73]: Transmission*
+              - combobox "Transmission" [ref=e74]:
+                - option "Select" [selected]
+                - option "Automatic"
+                - option "Manual"
+                - option "CVT"
+            - generic [ref=e75]:
+              - generic [ref=e76]: Fuel type*
+              - combobox "Fuel type" [ref=e77]:
+                - option "Select" [selected]
+                - option "Petrol"
+                - option "Diesel"
+                - option "Hybrid"
+                - option "Electric"
+      - generic [ref=e78]:
+        - generic [ref=e79]:
+          - heading "Images" [level=3] [ref=e80]
+          - generic [ref=e81]: Optional draft
+        - button "Add photos from phone" [ref=e83]:
+          - img [ref=e84]
+          - generic [ref=e87]: Add photos from phone
+        - group [ref=e88]:
+          - generic "Add image from URL" [ref=e89] [cursor=pointer]
+      - generic [ref=e90]:
+        - heading "Description *" [level=3] [ref=e92]
+        - textbox "Clean unit, buy-and-drive. Well maintained with full service history..." [ref=e93]
+      - generic [ref=e94]:
+        - heading "Listing Status" [level=3] [ref=e96]
+        - generic [ref=e97]:
+          - generic [ref=e98]:
+            - generic [ref=e99]:
+              - generic [ref=e100]: Status
+              - combobox "Status" [ref=e101]:
+                - option "Draft" [selected]
+                - option "Published"
+                - option "Sold"
+                - option "Unpublished"
+            - generic [ref=e102]:
+              - generic [ref=e103]: Stock category
+              - combobox "Stock category" [ref=e104]:
+                - option "New"
+                - option "Used" [selected]
+                - option "Imported"
+                - option "Available for importation"
+                - option "Traded-in"
+          - generic [ref=e105] [cursor=pointer]:
+            - checkbox "Featured listing Show at top of dealer page" [ref=e106]
+            - generic [ref=e107]:
+              - generic [ref=e108]: Featured listing
+              - generic [ref=e109]: Show at top of dealer page
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - paragraph [ref=e113]: Incomplete
+          - paragraph [ref=e114]:
+            - img [ref=e115]
+            - text: 9 missing
+        - button "Save vehicle" [disabled]

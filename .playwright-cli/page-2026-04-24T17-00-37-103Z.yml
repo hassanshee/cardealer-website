@@ -1,0 +1,22 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - paragraph [ref=e6]: Ocean Motors admin
+      - heading "Run listings and enquiries from one focused workspace." [level=1] [ref=e7]
+      - paragraph [ref=e8]: Keep stock live, react to new customer intent faster, and avoid the distraction of the public storefront while you work.
+      - generic [ref=e9]:
+        - generic [ref=e10]: Inventory publishing
+        - generic [ref=e11]: Lead triage
+        - generic [ref=e12]: Media and listing control
+    - generic [ref=e14]:
+      - paragraph [ref=e15]: Admin sign in
+      - heading "Access the operations workspace" [level=1] [ref=e16]
+      - paragraph [ref=e17]: Use your admin account to manage inventory, triage incoming leads, and keep the live site up to date.
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]: Email
+          - textbox "Email" [ref=e21]
+        - generic [ref=e22]:
+          - generic [ref=e23]: Password
+          - textbox "Password" [ref=e24]
+        - button "Sign in" [ref=e25]

@@ -69,17 +69,30 @@ beforeEach(() => {
     message: "Please review the highlighted fields and try again.",
     fieldErrors: {
       images: ["Add at least one gallery image."],
-      title: ["Enter a vehicle title."],
+      price: ["Enter the price in KES."],
     },
   });
 });
 
 describe("VehicleForm", () => {
+  it("keeps save disabled on a blank create form until the admin starts typing", () => {
+    render(<VehicleForm locations={[]} />);
+
+    const saveButton = screen.getByRole("button", { name: /save vehicle/i });
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText(/make/i), {
+      target: { value: "Toyota" },
+    });
+
+    expect(saveButton).toBeEnabled();
+  });
+
   it("renders a keyboard-accessible file staging button with image type filters", () => {
     const { container } = render(<VehicleForm locations={[]} />);
 
     expect(
-      screen.getByRole("button", { name: /stage files/i }),
+      screen.getByRole("button", { name: /add photos from phone/i }),
     ).toBeInTheDocument();
 
     const fileInput = container.querySelector(
@@ -97,19 +110,55 @@ describe("VehicleForm", () => {
     );
   });
 
+  it("quick-fills core fields from a WhatsApp-style dealer message", () => {
+    render(
+      <VehicleForm
+        locations={[
+          {
+            id: "mombasa",
+            name: "Mombasa Showroom",
+            addressLine: "Moi Avenue",
+            city: "Mombasa",
+            phone: "+254700000000",
+            hours: "9am-6pm",
+            isPrimary: true,
+            createdAt: "2026-01-01T00:00:00.000Z",
+          },
+        ]}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/dealer message/i), {
+      target: {
+        value:
+          "Toyota Harrier 2017 petrol automatic 83,000 km Ksh 3.4M Mombasa very clean",
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /parse & fill/i }));
+
+    expect(screen.getByLabelText(/make/i)).toHaveValue("Toyota");
+    expect(screen.getByLabelText(/model/i)).toHaveValue("Harrier");
+    expect(screen.getByLabelText(/year/i)).toHaveValue(2017);
+    expect(document.getElementById("price")).toHaveValue("3400000");
+    expect(screen.getByLabelText(/mileage/i)).toHaveValue("83000");
+    expect(screen.getByLabelText(/condition/i)).toHaveValue("Very clean");
+    expect(screen.getByLabelText(/transmission/i)).toHaveValue("Automatic");
+    expect(screen.getByLabelText(/fuel type/i)).toHaveValue("Petrol");
+    expect(screen.getByLabelText(/location/i)).toHaveValue("mombasa");
+  });
+
   it("surfaces field-level save errors inline after submission", async () => {
     render(<VehicleForm locations={[]} />);
 
+    fireEvent.change(screen.getByLabelText(/make/i), {
+      target: { value: "Toyota" },
+    });
     fireEvent.click(screen.getByRole("button", { name: /save vehicle/i }));
 
     await waitFor(() => {
-      expect(screen.getByText("Enter a vehicle title.")).toBeInTheDocument();
+      expect(screen.getByText("Enter the price in KES.")).toBeInTheDocument();
     });
 
-    expect(screen.getByLabelText(/listing title/i)).toHaveAttribute(
-      "aria-invalid",
-      "true",
-    );
     expect(screen.getByText("Add at least one gallery image.")).toHaveAttribute(
       "role",
       "alert",
@@ -121,8 +170,8 @@ describe("VehicleForm", () => {
     const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
     render(<VehicleForm locations={[]} vehicle={buildVehicle()} />);
 
-    fireEvent.change(screen.getByLabelText(/listing title/i), {
-      target: { value: "Updated title" },
+    fireEvent.change(screen.getByLabelText(/model/i), {
+      target: { value: "Corolla Cross" },
     });
     fireEvent.click(screen.getByRole("button", { name: /return to inventory/i }));
 
@@ -135,11 +184,22 @@ describe("VehicleForm", () => {
     mocks.saveVehicleAction.mockResolvedValueOnce({
       success: true,
       message: "Vehicle saved successfully.",
+      savedImages: [
+        {
+          imageUrl: "https://cdn.example.com/imported-car.jpg",
+          cloudinaryPublicId: "vehicle/imported-car",
+          sortOrder: 0,
+          isHero: true,
+          uploadState: "uploaded",
+          sourceUrl: null,
+        },
+      ],
     });
 
     render(<VehicleForm locations={[]} vehicle={buildVehicle()} />);
 
-    fireEvent.change(screen.getByLabelText(/stage image from url/i), {
+    fireEvent.click(screen.getByText(/add image from url/i));
+    fireEvent.change(screen.getByLabelText(/image url/i), {
       target: { value: "https://example.com/car.jpg" },
     });
     fireEvent.click(screen.getByRole("button", { name: /stage url/i }));
@@ -154,5 +214,48 @@ describe("VehicleForm", () => {
 
     expect(screen.queryByText("Imports on save")).not.toBeInTheDocument();
     expect(screen.getByText("Saved")).toBeInTheDocument();
+    expect(
+      screen.getByText("https://cdn.example.com/imported-car.jpg"),
+    ).toBeInTheDocument();
+  });
+
+  it("prevents duplicate submits while a save is in flight", async () => {
+    let resolveSave: (
+      value: Awaited<ReturnType<typeof mocks.saveVehicleAction>>,
+    ) => void = () => {};
+
+    mocks.saveVehicleAction.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveSave = resolve;
+      }),
+    );
+
+    render(<VehicleForm locations={[]} vehicle={buildVehicle()} />);
+
+    fireEvent.change(screen.getByLabelText(/model/i), {
+      target: { value: "Corolla Cross" },
+    });
+
+    const saveButton = screen.getByRole("button", { name: /save changes/i });
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(mocks.saveVehicleAction).toHaveBeenCalledTimes(1);
+    });
+
+    expect(saveButton).toBeDisabled();
+    fireEvent.click(saveButton);
+
+    expect(mocks.saveVehicleAction).toHaveBeenCalledTimes(1);
+
+    resolveSave({
+      success: true,
+      message: "Vehicle saved successfully.",
+      savedImages: [],
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("Vehicle saved successfully.")).toBeInTheDocument();
+    });
   });
 });

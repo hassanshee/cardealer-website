@@ -13,6 +13,32 @@ export const vehicleStatuses = [
   "unpublished",
 ] as const;
 
+export const vehicleConditionOptions = [
+  "Foreign used",
+  "Locally used",
+  "Brand new",
+  "Trade-in unit",
+  "Very clean",
+  "Clean unit",
+  "Accident free, original paint",
+  "New registration",
+  "Traded-in / Very clean",
+  "Traded-in / Clean unit",
+] as const;
+
+export const vehicleTransmissionOptions = [
+  "Automatic",
+  "Manual",
+  "CVT",
+] as const;
+
+export const vehicleFuelTypeOptions = [
+  "Petrol",
+  "Diesel",
+  "Hybrid",
+  "Electric",
+] as const;
+
 export const leadTypes = ["quote", "contact", "financing"] as const;
 
 export const inventorySortOptions = [
@@ -285,6 +311,7 @@ export interface ActionState {
   message: string;
   fieldErrors?: Record<string, string[]>;
   redirectTo?: string;
+  savedImages?: VehicleImageInput[];
 }
 
 export interface AdminSession {

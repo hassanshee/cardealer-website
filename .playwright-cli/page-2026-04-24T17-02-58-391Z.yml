@@ -1,0 +1,136 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - paragraph [ref=e7]: Admin
+      - paragraph [ref=e8]: Create vehicle
+    - generic [ref=e9]:
+      - link "New" [ref=e10] [cursor=pointer]:
+        - /url: /admin/vehicles/new
+        - img [ref=e11]
+        - text: New
+      - button "Menu" [ref=e12]:
+        - img [ref=e13]
+        - text: Menu
+  - main [ref=e15]:
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e20]:
+          - button "Return to inventory" [ref=e21]:
+            - img [ref=e22]
+            - text: Return to inventory
+          - generic [ref=e24]:
+            - heading "Create vehicle" [level=2] [ref=e25]
+            - generic [ref=e27]: Ready to create
+        - group [ref=e28]:
+          - generic "Quick Fill from dealer message Optional" [ref=e29] [cursor=pointer]:
+            - generic [ref=e30]:
+              - img [ref=e31]
+              - text: Quick Fill from dealer message
+            - generic [ref=e34]: Optional
+      - generic [ref=e35]:
+        - heading "Basic Details" [level=3] [ref=e37]
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - generic [ref=e40]: Make
+            - combobox "Make" [ref=e41]
+          - generic [ref=e42]:
+            - generic [ref=e43]: Model
+            - textbox "Model" [ref=e44]:
+              - /placeholder: Land Cruiser V8
+          - generic [ref=e45]:
+            - generic [ref=e46]: Year
+            - spinbutton "Year" [ref=e47]
+          - generic [ref=e48]:
+            - generic [ref=e49]: Location
+            - combobox "Location" [ref=e50]:
+              - option "Select location" [selected]
+              - option "Mombasa Showroom"
+              - option "Miritini Yard"
+          - generic [ref=e51]:
+            - generic [ref=e52]: Listing title
+            - textbox "Listing title" [ref=e53]:
+              - /placeholder: Optional. Auto-fills from year, make, and model if left blank.
+      - generic [ref=e54]:
+        - heading "Price" [level=3] [ref=e56]
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - generic [ref=e59]: Price
+            - textbox "2790000" [ref=e60]
+          - generic [ref=e61]:
+            - generic [ref=e62]: Condition
+            - combobox "Condition" [ref=e63]
+          - generic [ref=e64]:
+            - checkbox "Price negotiable" [ref=e65]
+            - text: Price negotiable
+      - generic [ref=e66]:
+        - heading "Specs" [level=3] [ref=e68]
+        - generic [ref=e69]:
+          - generic [ref=e70]:
+            - generic [ref=e71]: Mileage (km)
+            - textbox "Mileage (km)" [ref=e72]:
+              - /placeholder: "85000"
+          - generic [ref=e73]:
+            - generic [ref=e74]: Transmission
+            - combobox "Transmission" [ref=e75]
+          - generic [ref=e76]:
+            - generic [ref=e77]: Fuel type
+            - combobox "Fuel type" [ref=e78]
+          - generic [ref=e79]:
+            - generic [ref=e80]: Drive type
+            - combobox "Drive type" [ref=e81]
+          - generic [ref=e82]:
+            - generic [ref=e83]: Body type
+            - combobox "Body type" [ref=e84]
+          - generic [ref=e85]:
+            - generic [ref=e86]: Engine capacity
+            - textbox "Engine capacity" [ref=e87]:
+              - /placeholder: 4700cc
+          - generic [ref=e88]:
+            - generic [ref=e89]: Color
+            - textbox "Color" [ref=e90]:
+              - /placeholder: White
+      - generic [ref=e91]:
+        - heading "Images" [level=3] [ref=e93]
+        - generic [ref=e94]:
+          - generic [ref=e95]:
+            - generic [ref=e96]: Stage image from URL
+            - textbox "Stage image from URL" [ref=e97]:
+              - /placeholder: https://...
+          - button "Stage URL" [ref=e98]:
+            - img [ref=e99]
+            - text: Stage URL
+          - button "Stage Files" [ref=e103]:
+            - img [ref=e104]
+            - text: Stage Files
+        - generic [ref=e108]: No gallery images yet. You can save the vehicle first, then pull the Cloudinary folder later, or stage images now and upload them with the save action.
+      - generic [ref=e109]:
+        - heading "Description" [level=3] [ref=e111]
+        - generic [ref=e112]: Description
+        - textbox "Highlight condition, standout features, viewing location, and the strongest reason to enquire." [ref=e113]
+      - generic [ref=e114]:
+        - heading "Status" [level=3] [ref=e116]
+        - generic [ref=e117]:
+          - generic [ref=e118]:
+            - generic [ref=e119]: Status
+            - combobox [ref=e120]:
+              - option "Draft" [selected]
+              - option "Published"
+              - option "Sold"
+              - option "Unpublished"
+          - generic [ref=e121]:
+            - generic [ref=e122]: Stock category
+            - combobox "Stock category" [ref=e123]:
+              - option "New"
+              - option "Used" [selected]
+              - option "Imported"
+              - option "Available for importation"
+              - option "Traded-in"
+          - generic [ref=e124]:
+            - checkbox "Featured listing" [ref=e125]
+            - text: Featured listing
+      - generic [ref=e126]: Save commits the current field values, gallery order, and hero image together.
+      - generic [ref=e128]:
+        - generic [ref=e129]:
+          - paragraph [ref=e130]: Start filling to enable save
+          - paragraph [ref=e131]: Fill the essentials, then save and move on.
+        - button "Save vehicle" [disabled]

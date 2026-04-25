@@ -79,11 +79,53 @@ function buildDerivedStockCode({
   ).slice(0, 24);
 }
 
+function asVehicleNumber(value: FormDataEntryValue | null) {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const normalized = value.trim().replace(/[,\s]/g, "");
+  if (!normalized) {
+    return undefined;
+  }
+
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function buildDerivedTitle({
+  make,
+  model,
+  title,
+  year,
+}: {
+  make: string;
+  model: string;
+  title: string;
+  year: number;
+}) {
+  if (title) {
+    return title;
+  }
+
+  if (make && model && year > 0) {
+    return [year, make, model].join(" ");
+  }
+
+  return "";
+}
+
 export function mapVehicleFormData(formData: FormData): VehicleFormInput {
-  const title = asOptionalString(formData.get("title")) || "";
+  const rawTitle = asOptionalString(formData.get("title")) || "";
   const make = asOptionalString(formData.get("make")) || "";
   const model = asOptionalString(formData.get("model")) || "";
   const year = asOptionalNumber(formData.get("year")) || 0;
+  const title = buildDerivedTitle({
+    make,
+    model,
+    title: rawTitle,
+    year,
+  });
   const derivedIdentifiers = buildVehicleDraftIdentifiers({
     title,
     make,
@@ -104,9 +146,9 @@ export function mapVehicleFormData(formData: FormData): VehicleFormInput {
     model,
     year,
     condition: asOptionalString(formData.get("condition")) || "",
-    price: asOptionalNumber(formData.get("price")) || 0,
+    price: asVehicleNumber(formData.get("price")) ?? Number.NaN,
     negotiable: isTruthy(formData.get("negotiable")),
-    mileage: asOptionalNumber(formData.get("mileage")) || 0,
+    mileage: asVehicleNumber(formData.get("mileage")) ?? Number.NaN,
     transmission: asOptionalString(formData.get("transmission")) || "",
     fuelType: asOptionalString(formData.get("fuelType")) || "",
     driveType: asOptionalString(formData.get("driveType")),

@@ -1,0 +1,294 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e27]:
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - paragraph [ref=e31]: Admin
+        - paragraph [ref=e32]: Inventory
+      - generic [ref=e33]:
+        - link "New" [ref=e34] [cursor=pointer]:
+          - /url: /admin/vehicles/new
+          - img [ref=e35]
+          - text: New
+        - button "Menu" [ref=e36]:
+          - img [ref=e37]
+          - text: Menu
+    - main [ref=e39]:
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - heading "Inventory" [level=1] [ref=e43]
+            - paragraph [ref=e44]: Keep the list dense, filter quickly, and edit one listing at a time.
+          - link "Add vehicle" [ref=e45] [cursor=pointer]:
+            - /url: /admin/vehicles/new
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - paragraph [ref=e48]: Total
+            - paragraph [ref=e49]: "20"
+          - generic [ref=e50]:
+            - paragraph [ref=e51]: Published
+            - paragraph [ref=e52]: "16"
+          - generic [ref=e53]:
+            - paragraph [ref=e54]: Draft
+            - paragraph [ref=e55]: "4"
+          - generic [ref=e56]:
+            - paragraph [ref=e57]: Sold
+            - paragraph [ref=e58]: "0"
+        - generic [ref=e59]:
+          - generic [ref=e60]:
+            - text: Search
+            - textbox "Search" [ref=e61]:
+              - /placeholder: Title, stock code, make, model
+          - generic [ref=e62]:
+            - text: Status
+            - combobox "Status" [ref=e63]:
+              - option "All" [selected]
+              - option "Draft"
+              - option "Published"
+              - option "Sold"
+              - option "Unpublished"
+          - generic [ref=e64]:
+            - text: Category
+            - combobox "Category" [ref=e65]:
+              - option "All" [selected]
+              - option "New"
+              - option "Used"
+              - option "Imported"
+              - option "Available for Importation"
+              - option "Traded-in"
+          - generic [ref=e66]:
+            - text: Featured
+            - combobox "Featured" [ref=e67]:
+              - option "All" [selected]
+              - option "Featured"
+              - option "Standard"
+          - generic [ref=e68]:
+            - text: Fuel
+            - combobox "Fuel" [ref=e69]:
+              - option "All" [selected]
+              - option "Diesel"
+              - option "Petrol"
+          - generic [ref=e70]:
+            - text: Sort
+            - combobox "Sort" [ref=e71]:
+              - option "Newest updated" [selected]
+              - option "Price high to low"
+              - option "Price low to high"
+          - generic [ref=e72]:
+            - button "Apply" [ref=e73]
+            - link "Clear" [ref=e74] [cursor=pointer]:
+              - /url: /admin/vehicles
+        - paragraph [ref=e75]: 20 matching vehicles. Page 1 of 2.
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - img "LPXUS RX270 • 2011 • Accident-free" [ref=e81]
+              - generic [ref=e82]:
+                - paragraph [ref=e83]: LPXUS RX270 • 2011 • Accident-free
+                - paragraph [ref=e84]: 2011-LPX-RX2 - 2011 - Manual
+                - generic [ref=e86]: Published
+            - generic [ref=e87]:
+              - generic [ref=e88]: Ksh 2,100,000
+              - generic [ref=e89]: 2,000 km
+              - generic [ref=e90]: Petrol
+              - generic [ref=e91]: Updated 25 Apr 2026
+            - generic [ref=e92]:
+              - link "Edit" [ref=e93] [cursor=pointer]:
+                - /url: /admin/vehicles/d179b299-417d-4f10-82c5-06962f705f89
+              - button "Actions" [ref=e96]:
+                - img [ref=e97]
+                - text: Actions
+                - img [ref=e101]
+          - generic [ref=e103]:
+            - generic [ref=e104]:
+              - img "Lexus RX270 • 2011 • Accident-free" [ref=e106]
+              - generic [ref=e107]:
+                - paragraph [ref=e108]: Lexus RX270 • 2011 • Accident-free
+                - paragraph [ref=e109]: 2011-LEX-RX2-4 - 2011 - Automatic - Mombasa Showroom
+                - generic [ref=e111]: Draft
+            - generic [ref=e112]:
+              - generic [ref=e113]: Ksh 2,100,000
+              - generic [ref=e114]: 2,000 km
+              - generic [ref=e115]: Petrol
+              - generic [ref=e116]: Updated 24 Apr 2026
+            - generic [ref=e117]:
+              - link "Edit" [ref=e118] [cursor=pointer]:
+                - /url: /admin/vehicles/12765ec9-0b10-4315-a2a1-6022ac9553f7
+              - button "Actions" [ref=e121]:
+                - img [ref=e122]
+                - text: Actions
+                - img [ref=e126]
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - img "Lexus RX270 • 2011 • Accident-free" [ref=e131]
+              - generic [ref=e132]:
+                - paragraph [ref=e133]: Lexus RX270 • 2011 • Accident-free
+                - paragraph [ref=e134]: 2011-LEX-RX2-3 - 2011 - Automatic - Mombasa Showroom
+                - generic [ref=e136]: Draft
+            - generic [ref=e137]:
+              - generic [ref=e138]: Ksh 2,100,000
+              - generic [ref=e139]: 85,000 km
+              - generic [ref=e140]: Petrol
+              - generic [ref=e141]: Updated 24 Apr 2026
+            - generic [ref=e142]:
+              - link "Edit" [ref=e143] [cursor=pointer]:
+                - /url: /admin/vehicles/e74b562a-5855-4b94-9623-fb3daf713932
+              - button "Actions" [ref=e146]:
+                - img [ref=e147]
+                - text: Actions
+                - img [ref=e151]
+          - generic [ref=e153]:
+            - generic [ref=e154]:
+              - img "Lexus RX270 • 2011 • Accident-free" [ref=e156]
+              - generic [ref=e157]:
+                - paragraph [ref=e158]: Lexus RX270 • 2011 • Accident-free
+                - paragraph [ref=e159]: 2011-LEX-RX2-2 - 2011 - Automatic - Mombasa Showroom
+                - generic [ref=e161]: Draft
+            - generic [ref=e162]:
+              - generic [ref=e163]: Ksh 2,100,000
+              - generic [ref=e164]: 85,000 km
+              - generic [ref=e165]: Petrol
+              - generic [ref=e166]: Updated 24 Apr 2026
+            - generic [ref=e167]:
+              - link "Edit" [ref=e168] [cursor=pointer]:
+                - /url: /admin/vehicles/0f4a1202-7901-4142-962f-3418e95961b6
+              - button "Actions" [ref=e171]:
+                - img [ref=e172]
+                - text: Actions
+                - img [ref=e176]
+          - generic [ref=e178]:
+            - generic [ref=e179]:
+              - img "Lexus RX270 • 2011 • Accident-free" [ref=e181]
+              - generic [ref=e182]:
+                - paragraph [ref=e183]: Lexus RX270 • 2011 • Accident-free
+                - paragraph [ref=e184]: 2011-LEX-RX2 - 2011 - Automatic - Mombasa Showroom
+                - generic [ref=e186]: Draft
+            - generic [ref=e187]:
+              - generic [ref=e188]: Ksh 2,100,000
+              - generic [ref=e189]: 85,000 km
+              - generic [ref=e190]: Petrol
+              - generic [ref=e191]: Updated 24 Apr 2026
+            - generic [ref=e192]:
+              - link "Edit" [ref=e193] [cursor=pointer]:
+                - /url: /admin/vehicles/a49d7ba9-4dd3-4861-9167-df888612c6bc
+              - button "Actions" [ref=e196]:
+                - img [ref=e197]
+                - text: Actions
+                - img [ref=e201]
+          - generic [ref=e203]:
+            - generic [ref=e204]:
+              - img "2009 Toyota Land Cruiser V8 ZX" [ref=e206]
+              - generic [ref=e207]:
+                - paragraph [ref=e208]: 2009 Toyota Land Cruiser V8 ZX
+                - paragraph [ref=e209]: KDJ-001 - 2009 - Automatic - Miritini Yard
+                - generic [ref=e210]:
+                  - generic [ref=e211]: Published
+                  - generic [ref=e212]: Trade-in
+            - generic [ref=e213]:
+              - generic [ref=e214]: Ksh 3,900,000
+              - generic [ref=e215]: 174,000 km
+              - generic [ref=e216]: Petrol
+              - generic [ref=e217]: Updated 14 Mar 2026
+            - generic [ref=e218]:
+              - link "Edit" [ref=e219] [cursor=pointer]:
+                - /url: /admin/vehicles/10000000-0000-0000-0000-000000000008
+              - button "Actions" [ref=e222]:
+                - img [ref=e223]
+                - text: Actions
+                - img [ref=e227]
+          - generic [ref=e229]:
+            - generic [ref=e230]:
+              - img "2018 Range Rover Vogue" [ref=e232]
+              - generic [ref=e233]:
+                - paragraph [ref=e234]: 2018 Range Rover Vogue
+                - paragraph [ref=e235]: CAR-010 - 2018 - Automatic - Mombasa Showroom
+                - generic [ref=e236]:
+                  - generic [ref=e237]: Published
+                  - generic [ref=e238]: Featured
+                  - generic [ref=e239]: Import
+            - generic [ref=e240]:
+              - generic [ref=e241]: Ksh 12,500,000
+              - generic [ref=e242]: 140,000 km
+              - generic [ref=e243]: Diesel
+              - generic [ref=e244]: Updated 13 Mar 2026
+            - generic [ref=e245]:
+              - link "Edit" [ref=e246] [cursor=pointer]:
+                - /url: /admin/vehicles/10000000-0000-0000-0000-000000000001
+              - button "Actions" [ref=e249]:
+                - img [ref=e250]
+                - text: Actions
+                - img [ref=e254]
+          - generic [ref=e256]:
+            - generic [ref=e257]:
+              - img "2014 Toyota Fielder" [ref=e259]
+              - generic [ref=e260]:
+                - paragraph [ref=e261]: 2014 Toyota Fielder
+                - paragraph [ref=e262]: CAR-006 - 2014 - Automatic - Mombasa Showroom
+                - generic [ref=e263]:
+                  - generic [ref=e264]: Published
+                  - generic [ref=e265]: Featured
+            - generic [ref=e266]:
+              - generic [ref=e267]: Ksh 1,270,000
+              - generic [ref=e268]: 124,000 km
+              - generic [ref=e269]: Petrol
+              - generic [ref=e270]: Updated 13 Mar 2026
+            - generic [ref=e271]:
+              - link "Edit" [ref=e272] [cursor=pointer]:
+                - /url: /admin/vehicles/10000000-0000-0000-0000-000000000007
+              - button "Actions" [ref=e275]:
+                - img [ref=e276]
+                - text: Actions
+                - img [ref=e280]
+          - generic [ref=e282]:
+            - generic [ref=e283]:
+              - img "2016 Subaru Forester XT" [ref=e285]
+              - generic [ref=e286]:
+                - paragraph [ref=e287]: 2016 Subaru Forester XT
+                - paragraph [ref=e288]: CAR-001 - 2016 - Automatic - Mombasa Showroom
+                - generic [ref=e289]:
+                  - generic [ref=e290]: Published
+                  - generic [ref=e291]: Featured
+                  - generic [ref=e292]: Import
+            - generic [ref=e293]:
+              - generic [ref=e294]: Ksh 2,580,000
+              - generic [ref=e295]: 132,000 km
+              - generic [ref=e296]: Petrol
+              - generic [ref=e297]: Updated 13 Mar 2026
+            - generic [ref=e298]:
+              - link "Edit" [ref=e299] [cursor=pointer]:
+                - /url: /admin/vehicles/10000000-0000-0000-0000-000000000003
+              - button "Actions" [ref=e302]:
+                - img [ref=e303]
+                - text: Actions
+                - img [ref=e307]
+          - generic [ref=e309]:
+            - generic [ref=e310]:
+              - img "2014 Subaru Forester" [ref=e312]
+              - generic [ref=e313]:
+                - paragraph [ref=e314]: 2014 Subaru Forester
+                - paragraph [ref=e315]: CAR-008 - 2014 - Automatic - Mombasa Showroom
+                - generic [ref=e316]:
+                  - generic [ref=e317]: Published
+                  - generic [ref=e318]: Trade-in
+            - generic [ref=e319]:
+              - generic [ref=e320]: Ksh 1,790,000
+              - generic [ref=e321]: 129,000 km
+              - generic [ref=e322]: Petrol
+              - generic [ref=e323]: Updated 8 Mar 2026
+            - generic [ref=e324]:
+              - link "Edit" [ref=e325] [cursor=pointer]:
+                - /url: /admin/vehicles/10000000-0000-0000-0000-000000000010
+              - button "Actions" [ref=e328]:
+                - img [ref=e329]
+                - text: Actions
+                - img [ref=e333]
+        - generic [ref=e335]:
+          - paragraph [ref=e336]: Showing 1-10 of 20 vehicles
+          - navigation "Inventory pages" [ref=e337]:
+            - generic [ref=e338]: Previous
+            - link "1" [ref=e340] [cursor=pointer]:
+              - /url: /admin/vehicles
+            - link "2" [ref=e342] [cursor=pointer]:
+              - /url: /admin/vehicles?page=2
+            - link "Next" [ref=e343] [cursor=pointer]:
+              - /url: /admin/vehicles?page=2
+  - alert [ref=e26]: Inventory | Ocean Motors Admin

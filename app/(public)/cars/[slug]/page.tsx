@@ -23,6 +23,7 @@ import { SpecGrid } from "@/components/inventory/spec-grid";
 import { VehicleCard } from "@/components/inventory/vehicle-card";
 import { VehicleGallery } from "@/components/inventory/vehicle-gallery";
 import { JsonLd } from "@/components/layout/json-ld";
+import { MobileOnly } from "@/components/layout/mobile-only";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -472,6 +473,33 @@ function VehicleSupportPanel({
   tradeInHref: string;
   viewingHref: string;
 }) {
+  const actionContent = (
+    <>
+      <div className="grid gap-3 lg:grid-cols-2">
+        <Button asChild variant="whatsapp" className="w-full rounded-[18px]">
+          <Link href={askHref}>Ask about price</Link>
+        </Button>
+        <Button asChild variant="secondary" className="w-full rounded-[18px]">
+          <Link href={viewingHref}>Book viewing</Link>
+        </Button>
+        <Button asChild variant="secondary" className="w-full rounded-[18px]">
+          <Link href={tradeInHref}>Start trade-in</Link>
+        </Button>
+        {mapUrl ? (
+          <Button asChild variant="ghost" className="w-full rounded-[18px]">
+            <a href={mapUrl} target="_blank" rel="noreferrer">
+              Open location
+            </a>
+          </Button>
+        ) : null}
+      </div>
+
+      <div className="mt-3">
+        <ShareVehicleAction title={title} url={shareUrl} />
+      </div>
+    </>
+  );
+
   return (
     <Card className="rounded-[30px] bg-[linear-gradient(180deg,_rgba(255,255,255,0.98),_rgba(247,249,251,0.96))] p-6 shadow-[0_20px_50px_rgba(15,23,42,0.05)] lg:p-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -526,28 +554,14 @@ function VehicleSupportPanel({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 lg:grid-cols-2">
-        <Button asChild variant="whatsapp" className="w-full rounded-[18px]">
-          <Link href={askHref}>Ask about price</Link>
-        </Button>
-        <Button asChild variant="secondary" className="w-full rounded-[18px]">
-          <Link href={viewingHref}>Book viewing</Link>
-        </Button>
-        <Button asChild variant="secondary" className="w-full rounded-[18px]">
-          <Link href={tradeInHref}>Start trade-in</Link>
-        </Button>
-        {mapUrl ? (
-          <Button asChild variant="ghost" className="w-full rounded-[18px]">
-            <a href={mapUrl} target="_blank" rel="noreferrer">
-              Open location
-            </a>
-          </Button>
-        ) : null}
-      </div>
+      <div className="mt-5 hidden lg:block">{actionContent}</div>
 
-      <div className="mt-3">
-        <ShareVehicleAction title={title} url={shareUrl} />
-      </div>
+      <details className="mt-4 rounded-[18px] border border-border/80 bg-white/88 p-3 lg:hidden">
+        <summary className="cursor-pointer list-none text-sm font-semibold text-text-primary [&::-webkit-details-marker]:hidden">
+          More actions
+        </summary>
+        <div className="mt-3 border-t border-border/70 pt-3">{actionContent}</div>
+      </details>
     </Card>
   );
 }
@@ -835,20 +849,46 @@ export default async function VehicleDetailPage({
           </section>
 
           <section id="contact-panel" className="space-y-4">
-            <VehicleEnquiryForm
-              vehicleId={vehicle.id}
-              vehicleTitle={vehicle.title}
-              source="Vehicle detail page"
-              phoneHref={siteConfig.phoneHref}
-              phoneDisplay={siteConfig.phoneDisplay}
-              whatsappUrl={whatsappUrl}
-              tradeInHref={`/trade-in?vehicle=${vehicle.slug}`}
-              compact
-              allowedIntents={["quote", "viewing"]}
-              eyebrow="Sales help"
-              heading="Ask about price, availability, or viewing"
-              description="WhatsApp is fastest, but you can also call or send one short message to confirm viewing time, paperwork support, or your trade-in options."
-            />
+            <div className="hidden lg:block">
+              <VehicleEnquiryForm
+                vehicleId={vehicle.id}
+                vehicleTitle={vehicle.title}
+                source="Vehicle detail page"
+                phoneHref={siteConfig.phoneHref}
+                phoneDisplay={siteConfig.phoneDisplay}
+                whatsappUrl={whatsappUrl}
+                tradeInHref={`/trade-in?vehicle=${vehicle.slug}`}
+                compact
+                allowedIntents={["quote", "viewing"]}
+                eyebrow="More options"
+                heading="Ask about price, availability, or viewing"
+                description="WhatsApp is fastest, but you can also call or send one short message to confirm viewing time, paperwork support, or your trade-in options."
+              />
+            </div>
+
+            <MobileOnly>
+              <details className="rounded-[24px] border border-border/80 bg-surface px-4 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+                <summary className="cursor-pointer list-none text-sm font-semibold text-text-primary [&::-webkit-details-marker]:hidden">
+                  More questions, viewing, or trade-in
+                </summary>
+                <div className="mt-3 border-t border-border/70 pt-3">
+                  <VehicleEnquiryForm
+                    vehicleId={vehicle.id}
+                    vehicleTitle={vehicle.title}
+                    source="Vehicle detail page"
+                    phoneHref={siteConfig.phoneHref}
+                    phoneDisplay={siteConfig.phoneDisplay}
+                    whatsappUrl={whatsappUrl}
+                    tradeInHref={`/trade-in?vehicle=${vehicle.slug}`}
+                    compact
+                    allowedIntents={["quote", "viewing"]}
+                    eyebrow="More options"
+                    heading="Ask about price, availability, or viewing"
+                    description="Use this only if WhatsApp or Call is not enough and you need a specific reply."
+                  />
+                </div>
+              </details>
+            </MobileOnly>
           </section>
 
           {similarVehicles.length ? (
@@ -886,7 +926,6 @@ export default async function VehicleDetailPage({
       <MobileCtaBar
         whatsappUrl={whatsappUrl}
         phoneHref={siteConfig.phoneHref}
-        viewingHref={`${vehiclePath}?intent=viewing#contact-panel`}
       />
     </>
   );

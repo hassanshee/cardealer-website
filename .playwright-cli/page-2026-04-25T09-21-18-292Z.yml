@@ -1,0 +1,168 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - paragraph [ref=e7]: Admin
+      - paragraph [ref=e8]: Create vehicle
+    - generic [ref=e9]:
+      - link "New" [ref=e10] [cursor=pointer]:
+        - /url: /admin/vehicles/new
+        - img [ref=e11]
+        - text: New
+      - button "Menu" [ref=e12]:
+        - img [ref=e13]
+        - text: Menu
+  - main [ref=e15]:
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e20]:
+          - button "Return to inventory" [ref=e21]:
+            - img [ref=e22]
+            - text: Return to inventory
+          - generic [ref=e24]:
+            - heading "Create vehicle" [level=2] [ref=e25]
+            - paragraph [ref=e26]: Paste a dealer message, add photos, then review the essentials.
+            - generic [ref=e27]:
+              - generic [ref=e28]: Ready to create
+              - generic [ref=e29]: 9 missing
+        - group [ref=e30]:
+          - generic "Quick Fill WhatsApp" [ref=e31] [cursor=pointer]:
+            - generic [ref=e32]:
+              - img [ref=e33]
+              - text: Quick Fill
+            - generic [ref=e36]: WhatsApp
+          - paragraph [ref=e37]: Paste a WhatsApp, Facebook, or dealer note to fill make, model, year, price, specs, and description hints.
+          - generic [ref=e38]:
+            - generic [ref=e39]:
+              - generic [ref=e40]: Dealer message
+              - textbox "Dealer message" [ref=e41]:
+                - /placeholder: Toyota Harrier 2017, 2.5L petrol, auto, 83k km, Ksh 3.4M, Mombasa...
+            - generic [ref=e42]:
+              - button "Parse & fill" [ref=e43]
+              - button "Clear paste" [ref=e44]
+      - generic [ref=e45]:
+        - generic [ref=e47]:
+          - heading "Basic Details" [level=3] [ref=e48]
+          - generic [ref=e49]: Required
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - generic [ref=e52]: Make*
+            - combobox "Make" [ref=e53]
+          - generic [ref=e54]:
+            - generic [ref=e55]: Model*
+            - textbox "Model" [ref=e56]:
+              - /placeholder: Land Cruiser V8
+          - generic [ref=e57]:
+            - generic [ref=e58]: Year*
+            - spinbutton "Year" [ref=e59]
+          - generic [ref=e60]:
+            - generic [ref=e61]: Location
+            - combobox "Location" [ref=e62]:
+              - option "Select location" [selected]
+              - option "Mombasa Showroom"
+              - option "Miritini Yard"
+          - group [ref=e63]:
+            - generic "Optional title and stock note" [ref=e64] [cursor=pointer]
+      - generic [ref=e65]:
+        - generic [ref=e67]:
+          - heading "Price" [level=3] [ref=e68]
+          - generic [ref=e69]: Required
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - generic [ref=e72]: Price*
+            - textbox "2790000" [ref=e73]
+            - paragraph [ref=e74]: KES, commas ok.
+          - generic [ref=e75]:
+            - generic [ref=e76]: Condition*
+            - combobox "Condition" [ref=e77]:
+              - option "Select condition" [selected]
+              - option "Foreign used"
+              - option "Locally used"
+              - option "Brand new"
+              - option "Trade-in unit"
+              - option "Very clean"
+              - option "Clean unit"
+              - option "Accident free, original paint"
+              - option "New registration"
+              - option "Traded-in / Very clean"
+              - option "Traded-in / Clean unit"
+          - generic [ref=e78]:
+            - checkbox "Price negotiable" [ref=e79]
+            - text: Price negotiable
+      - generic [ref=e80]:
+        - generic [ref=e82]:
+          - heading "Specs" [level=3] [ref=e83]
+          - generic [ref=e84]: Required
+        - generic [ref=e85]:
+          - generic [ref=e86]:
+            - generic [ref=e87]: Mileage (km)*
+            - textbox "Mileage (km)" [ref=e88]:
+              - /placeholder: "85000"
+          - generic [ref=e89]:
+            - generic [ref=e90]: Transmission*
+            - combobox "Transmission" [ref=e91]:
+              - option "Select transmission" [selected]
+              - option "Automatic"
+              - option "Manual"
+              - option "CVT"
+          - generic [ref=e92]:
+            - generic [ref=e93]: Fuel type*
+            - combobox "Fuel type" [ref=e94]:
+              - option "Select fuel" [selected]
+              - option "Petrol"
+              - option "Diesel"
+              - option "Hybrid"
+              - option "Electric"
+          - group [ref=e95]:
+            - generic "Optional specs" [ref=e96] [cursor=pointer]
+      - generic [ref=e97]:
+        - generic [ref=e99]:
+          - heading "Images" [level=3] [ref=e100]
+          - generic [ref=e101]: Optional draft
+        - generic [ref=e102]:
+          - button "Add photos from phone" [ref=e103]:
+            - img [ref=e104]
+            - text: Add photos from phone
+          - paragraph [ref=e109]: Photos are staged now and uploaded when you save. JPG, PNG, or WEBP only, up to 8 MB each.
+        - group [ref=e110]:
+          - generic "Add image from URL" [ref=e111] [cursor=pointer]:
+            - img [ref=e112]
+            - text: Add image from URL
+        - generic [ref=e115]: Drafts can be saved without images. Published listings need at least one staged image.
+      - generic [ref=e116]:
+        - generic [ref=e118]:
+          - heading "Description" [level=3] [ref=e119]
+          - generic [ref=e120]: Required
+        - generic [ref=e121]: Description*
+        - textbox "Clean unit, buy-and-drive, viewing in Mombasa, trade-in accepted..." [ref=e122]
+      - generic [ref=e123]:
+        - generic [ref=e125]:
+          - heading "Status" [level=3] [ref=e126]
+          - generic [ref=e127]: Final
+        - generic [ref=e128]:
+          - generic [ref=e129]:
+            - generic [ref=e130]: Status
+            - combobox [ref=e131]:
+              - option "Draft" [selected]
+              - option "Published"
+              - option "Sold"
+              - option "Unpublished"
+          - generic [ref=e132]:
+            - generic [ref=e133]: Stock category
+            - combobox "Stock category" [ref=e134]:
+              - option "New"
+              - option "Used" [selected]
+              - option "Imported"
+              - option "Available for importation"
+              - option "Traded-in"
+          - generic [ref=e135]:
+            - checkbox "Featured listing" [ref=e136]
+            - text: Featured listing
+          - paragraph [ref=e137]: Draft saves your work. Published appears on the live inventory and requires at least one image.
+      - generic [ref=e138]: Save commits field values, image order, and hero image together.
+      - generic [ref=e140]:
+        - generic [ref=e141]:
+          - paragraph [ref=e142]:
+            - img [ref=e143]
+            - text: 9 missing
+          - paragraph [ref=e145]: "Next: Make"
+        - button "Save vehicle" [disabled]

@@ -266,6 +266,7 @@ describe("saveVehicleAction", () => {
     expect(result).toEqual({
       success: true,
       message: "Vehicle saved successfully.",
+      savedImages: [],
     });
   });
 

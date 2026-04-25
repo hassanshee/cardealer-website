@@ -1,0 +1,367 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e27]:
+    - complementary [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - img [ref=e33]
+            - generic [ref=e36]:
+              - paragraph [ref=e37]: Operations
+              - heading "Ocean Motors" [level=1] [ref=e38]
+          - generic [ref=e39]:
+            - paragraph [ref=e40]: Signed in
+            - paragraph [ref=e41]: Production Admin
+            - paragraph [ref=e42]: asabatheif@gmail.com | supabase
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - paragraph [ref=e45]: Workspace
+            - link "Add" [ref=e46] [cursor=pointer]:
+              - /url: /admin/vehicles/new
+              - img [ref=e47]
+              - text: Add
+          - navigation "Admin navigation" [ref=e48]:
+            - link "Inventory Live Manage listings and publishing state." [ref=e49] [cursor=pointer]:
+              - /url: /admin/vehicles
+              - generic [ref=e50]:
+                - paragraph [ref=e51]: Inventory
+                - generic [ref=e52]: Live
+              - paragraph [ref=e53]: Manage listings and publishing state.
+            - link "Create vehicle Add a new stock item." [ref=e54] [cursor=pointer]:
+              - /url: /admin/vehicles/new
+              - paragraph [ref=e56]: Create vehicle
+              - paragraph [ref=e57]: Add a new stock item.
+            - link "Lead inbox Respond to new enquiries quickly." [ref=e58] [cursor=pointer]:
+              - /url: /admin/leads
+              - paragraph [ref=e60]: Lead inbox
+              - paragraph [ref=e61]: Respond to new enquiries quickly.
+        - button "Sign out" [ref=e63]:
+          - text: Sign out
+          - img [ref=e64]
+    - main [ref=e68]:
+      - generic [ref=e69]:
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - heading "Inventory" [level=1] [ref=e72]
+            - paragraph [ref=e73]: Keep the list dense, filter quickly, and edit one listing at a time.
+          - link "Add vehicle" [ref=e74] [cursor=pointer]:
+            - /url: /admin/vehicles/new
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - paragraph [ref=e77]: Total
+            - paragraph [ref=e78]: "18"
+          - generic [ref=e79]:
+            - paragraph [ref=e80]: Published
+            - paragraph [ref=e81]: "15"
+          - generic [ref=e82]:
+            - paragraph [ref=e83]: Draft
+            - paragraph [ref=e84]: "3"
+          - generic [ref=e85]:
+            - paragraph [ref=e86]: Sold
+            - paragraph [ref=e87]: "0"
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - text: Search
+            - textbox "Search" [ref=e90]:
+              - /placeholder: Title, stock code, make, model
+          - generic [ref=e91]:
+            - text: Status
+            - combobox "Status" [ref=e92]:
+              - option "All" [selected]
+              - option "Draft"
+              - option "Published"
+              - option "Sold"
+              - option "Unpublished"
+          - generic [ref=e93]:
+            - text: Category
+            - combobox "Category" [ref=e94]:
+              - option "All" [selected]
+              - option "New"
+              - option "Used"
+              - option "Imported"
+              - option "Available for Importation"
+              - option "Traded-in"
+          - generic [ref=e95]:
+            - text: Featured
+            - combobox "Featured" [ref=e96]:
+              - option "All" [selected]
+              - option "Featured"
+              - option "Standard"
+          - generic [ref=e97]:
+            - text: Fuel
+            - combobox "Fuel" [ref=e98]:
+              - option "All" [selected]
+              - option "Diesel"
+              - option "Petrol"
+          - generic [ref=e99]:
+            - text: Sort
+            - combobox "Sort" [ref=e100]:
+              - option "Newest updated" [selected]
+              - option "Price high to low"
+              - option "Price low to high"
+          - generic [ref=e101]:
+            - button "Apply" [ref=e102]
+            - link "Clear" [ref=e103] [cursor=pointer]:
+              - /url: /admin/vehicles
+        - paragraph [ref=e104]: 18 matching vehicles. Page 1 of 2.
+        - table [ref=e107]:
+          - rowgroup [ref=e108]:
+            - row "Select all visible rows Photo Vehicle Status Price Mileage Fuel Updated Actions" [ref=e109]:
+              - columnheader "Select all visible rows" [ref=e110]:
+                - checkbox "Select all visible rows" [ref=e111]
+              - columnheader "Photo" [ref=e112]
+              - columnheader "Vehicle" [ref=e113]
+              - columnheader "Status" [ref=e114]
+              - columnheader "Price" [ref=e115]
+              - columnheader "Mileage" [ref=e116]
+              - columnheader "Fuel" [ref=e117]
+              - columnheader "Updated" [ref=e118]
+              - columnheader "Actions" [ref=e119]
+          - rowgroup [ref=e120]:
+            - row "Select Lexus RX270 • 2011 • Accident-free Lexus RX270 • 2011 • Accident-free Lexus RX270 • 2011 • Accident-free 2011-LEX-RX2-3 - 2011 - Automatic - Mombasa Showroom Draft Ksh 2,100,000 85,000 km Petrol 24 Apr 2026 Edit Actions" [ref=e121]:
+              - cell "Select Lexus RX270 • 2011 • Accident-free" [ref=e122]:
+                - checkbox "Select Lexus RX270 • 2011 • Accident-free" [ref=e123]
+              - cell "Lexus RX270 • 2011 • Accident-free" [ref=e124]:
+                - img "Lexus RX270 • 2011 • Accident-free" [ref=e126]
+              - cell "Lexus RX270 • 2011 • Accident-free 2011-LEX-RX2-3 - 2011 - Automatic - Mombasa Showroom" [ref=e127]:
+                - paragraph [ref=e128]: Lexus RX270 • 2011 • Accident-free
+                - paragraph [ref=e129]: 2011-LEX-RX2-3 - 2011 - Automatic - Mombasa Showroom
+              - cell "Draft" [ref=e130]:
+                - generic [ref=e132]: Draft
+              - cell "Ksh 2,100,000" [ref=e133]
+              - cell "85,000 km" [ref=e134]
+              - cell "Petrol" [ref=e135]
+              - cell "24 Apr 2026" [ref=e136]
+              - cell "Edit Actions" [ref=e137]:
+                - generic [ref=e138]:
+                  - link "Edit" [ref=e139] [cursor=pointer]:
+                    - /url: /admin/vehicles/e74b562a-5855-4b94-9623-fb3daf713932
+                  - button "Actions" [ref=e142]:
+                    - img [ref=e143]
+                    - text: Actions
+                    - img [ref=e147]
+            - row "Select Lexus RX270 • 2011 • Accident-free Lexus RX270 • 2011 • Accident-free Lexus RX270 • 2011 • Accident-free 2011-LEX-RX2-2 - 2011 - Automatic - Mombasa Showroom Draft Ksh 2,100,000 85,000 km Petrol 24 Apr 2026 Edit Actions" [ref=e149]:
+              - cell "Select Lexus RX270 • 2011 • Accident-free" [ref=e150]:
+                - checkbox "Select Lexus RX270 • 2011 • Accident-free" [ref=e151]
+              - cell "Lexus RX270 • 2011 • Accident-free" [ref=e152]:
+                - img "Lexus RX270 • 2011 • Accident-free" [ref=e154]
+              - cell "Lexus RX270 • 2011 • Accident-free 2011-LEX-RX2-2 - 2011 - Automatic - Mombasa Showroom" [ref=e155]:
+                - paragraph [ref=e156]: Lexus RX270 • 2011 • Accident-free
+                - paragraph [ref=e157]: 2011-LEX-RX2-2 - 2011 - Automatic - Mombasa Showroom
+              - cell "Draft" [ref=e158]:
+                - generic [ref=e160]: Draft
+              - cell "Ksh 2,100,000" [ref=e161]
+              - cell "85,000 km" [ref=e162]
+              - cell "Petrol" [ref=e163]
+              - cell "24 Apr 2026" [ref=e164]
+              - cell "Edit Actions" [ref=e165]:
+                - generic [ref=e166]:
+                  - link "Edit" [ref=e167] [cursor=pointer]:
+                    - /url: /admin/vehicles/0f4a1202-7901-4142-962f-3418e95961b6
+                  - button "Actions" [ref=e170]:
+                    - img [ref=e171]
+                    - text: Actions
+                    - img [ref=e175]
+            - row "Select Lexus RX270 • 2011 • Accident-free Lexus RX270 • 2011 • Accident-free Lexus RX270 • 2011 • Accident-free 2011-LEX-RX2 - 2011 - Automatic - Mombasa Showroom Draft Ksh 2,100,000 85,000 km Petrol 24 Apr 2026 Edit Actions" [ref=e177]:
+              - cell "Select Lexus RX270 • 2011 • Accident-free" [ref=e178]:
+                - checkbox "Select Lexus RX270 • 2011 • Accident-free" [ref=e179]
+              - cell "Lexus RX270 • 2011 • Accident-free" [ref=e180]:
+                - img "Lexus RX270 • 2011 • Accident-free" [ref=e182]
+              - cell "Lexus RX270 • 2011 • Accident-free 2011-LEX-RX2 - 2011 - Automatic - Mombasa Showroom" [ref=e183]:
+                - paragraph [ref=e184]: Lexus RX270 • 2011 • Accident-free
+                - paragraph [ref=e185]: 2011-LEX-RX2 - 2011 - Automatic - Mombasa Showroom
+              - cell "Draft" [ref=e186]:
+                - generic [ref=e188]: Draft
+              - cell "Ksh 2,100,000" [ref=e189]
+              - cell "85,000 km" [ref=e190]
+              - cell "Petrol" [ref=e191]
+              - cell "24 Apr 2026" [ref=e192]
+              - cell "Edit Actions" [ref=e193]:
+                - generic [ref=e194]:
+                  - link "Edit" [ref=e195] [cursor=pointer]:
+                    - /url: /admin/vehicles/a49d7ba9-4dd3-4861-9167-df888612c6bc
+                  - button "Actions" [ref=e198]:
+                    - img [ref=e199]
+                    - text: Actions
+                    - img [ref=e203]
+            - row "Select 2009 Toyota Land Cruiser V8 ZX 2009 Toyota Land Cruiser V8 ZX 2009 Toyota Land Cruiser V8 ZX KDJ-001 - 2009 - Automatic - Miritini Yard Published Trade-in Ksh 3,900,000 174,000 km Petrol 14 Mar 2026 Edit Actions" [ref=e205]:
+              - cell "Select 2009 Toyota Land Cruiser V8 ZX" [ref=e206]:
+                - checkbox "Select 2009 Toyota Land Cruiser V8 ZX" [ref=e207]
+              - cell "2009 Toyota Land Cruiser V8 ZX" [ref=e208]:
+                - img "2009 Toyota Land Cruiser V8 ZX" [ref=e210]
+              - cell "2009 Toyota Land Cruiser V8 ZX KDJ-001 - 2009 - Automatic - Miritini Yard" [ref=e211]:
+                - paragraph [ref=e212]: 2009 Toyota Land Cruiser V8 ZX
+                - paragraph [ref=e213]: KDJ-001 - 2009 - Automatic - Miritini Yard
+              - cell "Published Trade-in" [ref=e214]:
+                - generic [ref=e215]:
+                  - generic [ref=e216]: Published
+                  - generic [ref=e217]: Trade-in
+              - cell "Ksh 3,900,000" [ref=e218]
+              - cell "174,000 km" [ref=e219]
+              - cell "Petrol" [ref=e220]
+              - cell "14 Mar 2026" [ref=e221]
+              - cell "Edit Actions" [ref=e222]:
+                - generic [ref=e223]:
+                  - link "Edit" [ref=e224] [cursor=pointer]:
+                    - /url: /admin/vehicles/10000000-0000-0000-0000-000000000008
+                  - button "Actions" [ref=e227]:
+                    - img [ref=e228]
+                    - text: Actions
+                    - img [ref=e232]
+            - row "Select 2018 Range Rover Vogue 2018 Range Rover Vogue 2018 Range Rover Vogue CAR-010 - 2018 - Automatic - Mombasa Showroom Published Featured Import Ksh 12,500,000 140,000 km Diesel 13 Mar 2026 Edit Actions" [ref=e234]:
+              - cell "Select 2018 Range Rover Vogue" [ref=e235]:
+                - checkbox "Select 2018 Range Rover Vogue" [ref=e236]
+              - cell "2018 Range Rover Vogue" [ref=e237]:
+                - img "2018 Range Rover Vogue" [ref=e239]
+              - cell "2018 Range Rover Vogue CAR-010 - 2018 - Automatic - Mombasa Showroom" [ref=e240]:
+                - paragraph [ref=e241]: 2018 Range Rover Vogue
+                - paragraph [ref=e242]: CAR-010 - 2018 - Automatic - Mombasa Showroom
+              - cell "Published Featured Import" [ref=e243]:
+                - generic [ref=e244]:
+                  - generic [ref=e245]: Published
+                  - generic [ref=e246]: Featured
+                  - generic [ref=e247]: Import
+              - cell "Ksh 12,500,000" [ref=e248]
+              - cell "140,000 km" [ref=e249]
+              - cell "Diesel" [ref=e250]
+              - cell "13 Mar 2026" [ref=e251]
+              - cell "Edit Actions" [ref=e252]:
+                - generic [ref=e253]:
+                  - link "Edit" [ref=e254] [cursor=pointer]:
+                    - /url: /admin/vehicles/10000000-0000-0000-0000-000000000001
+                  - button "Actions" [ref=e257]:
+                    - img [ref=e258]
+                    - text: Actions
+                    - img [ref=e262]
+            - row "Select 2014 Toyota Fielder 2014 Toyota Fielder 2014 Toyota Fielder CAR-006 - 2014 - Automatic - Mombasa Showroom Published Featured Ksh 1,270,000 124,000 km Petrol 13 Mar 2026 Edit Actions" [ref=e264]:
+              - cell "Select 2014 Toyota Fielder" [ref=e265]:
+                - checkbox "Select 2014 Toyota Fielder" [ref=e266]
+              - cell "2014 Toyota Fielder" [ref=e267]:
+                - img "2014 Toyota Fielder" [ref=e269]
+              - cell "2014 Toyota Fielder CAR-006 - 2014 - Automatic - Mombasa Showroom" [ref=e270]:
+                - paragraph [ref=e271]: 2014 Toyota Fielder
+                - paragraph [ref=e272]: CAR-006 - 2014 - Automatic - Mombasa Showroom
+              - cell "Published Featured" [ref=e273]:
+                - generic [ref=e274]:
+                  - generic [ref=e275]: Published
+                  - generic [ref=e276]: Featured
+              - cell "Ksh 1,270,000" [ref=e277]
+              - cell "124,000 km" [ref=e278]
+              - cell "Petrol" [ref=e279]
+              - cell "13 Mar 2026" [ref=e280]
+              - cell "Edit Actions" [ref=e281]:
+                - generic [ref=e282]:
+                  - link "Edit" [ref=e283] [cursor=pointer]:
+                    - /url: /admin/vehicles/10000000-0000-0000-0000-000000000007
+                  - button "Actions" [ref=e286]:
+                    - img [ref=e287]
+                    - text: Actions
+                    - img [ref=e291]
+            - row "Select 2016 Subaru Forester XT 2016 Subaru Forester XT 2016 Subaru Forester XT CAR-001 - 2016 - Automatic - Mombasa Showroom Published Featured Import Ksh 2,580,000 132,000 km Petrol 13 Mar 2026 Edit Actions" [ref=e293]:
+              - cell "Select 2016 Subaru Forester XT" [ref=e294]:
+                - checkbox "Select 2016 Subaru Forester XT" [ref=e295]
+              - cell "2016 Subaru Forester XT" [ref=e296]:
+                - img "2016 Subaru Forester XT" [ref=e298]
+              - cell "2016 Subaru Forester XT CAR-001 - 2016 - Automatic - Mombasa Showroom" [ref=e299]:
+                - paragraph [ref=e300]: 2016 Subaru Forester XT
+                - paragraph [ref=e301]: CAR-001 - 2016 - Automatic - Mombasa Showroom
+              - cell "Published Featured Import" [ref=e302]:
+                - generic [ref=e303]:
+                  - generic [ref=e304]: Published
+                  - generic [ref=e305]: Featured
+                  - generic [ref=e306]: Import
+              - cell "Ksh 2,580,000" [ref=e307]
+              - cell "132,000 km" [ref=e308]
+              - cell "Petrol" [ref=e309]
+              - cell "13 Mar 2026" [ref=e310]
+              - cell "Edit Actions" [ref=e311]:
+                - generic [ref=e312]:
+                  - link "Edit" [ref=e313] [cursor=pointer]:
+                    - /url: /admin/vehicles/10000000-0000-0000-0000-000000000003
+                  - button "Actions" [ref=e316]:
+                    - img [ref=e317]
+                    - text: Actions
+                    - img [ref=e321]
+            - row "Select 2013 Toyota Land Cruiser Prado 2013 Toyota Land Cruiser Prado 2013 Toyota Land Cruiser Prado CAR-005 - 2013 - Automatic - Miritini Yard Published Featured Trade-in Ksh 3,800,000 148,000 km Diesel 8 Mar 2026 Edit Actions" [ref=e323]:
+              - cell "Select 2013 Toyota Land Cruiser Prado" [ref=e324]:
+                - checkbox "Select 2013 Toyota Land Cruiser Prado" [ref=e325]
+              - cell "2013 Toyota Land Cruiser Prado" [ref=e326]:
+                - img "2013 Toyota Land Cruiser Prado" [ref=e328]
+              - cell "2013 Toyota Land Cruiser Prado CAR-005 - 2013 - Automatic - Miritini Yard" [ref=e329]:
+                - paragraph [ref=e330]: 2013 Toyota Land Cruiser Prado
+                - paragraph [ref=e331]: CAR-005 - 2013 - Automatic - Miritini Yard
+              - cell "Published Featured Trade-in" [ref=e332]:
+                - generic [ref=e333]:
+                  - generic [ref=e334]: Published
+                  - generic [ref=e335]: Featured
+                  - generic [ref=e336]: Trade-in
+              - cell "Ksh 3,800,000" [ref=e337]
+              - cell "148,000 km" [ref=e338]
+              - cell "Diesel" [ref=e339]
+              - cell "8 Mar 2026" [ref=e340]
+              - cell "Edit Actions" [ref=e341]:
+                - generic [ref=e342]:
+                  - link "Edit" [ref=e343] [cursor=pointer]:
+                    - /url: /admin/vehicles/10000000-0000-0000-0000-000000000006
+                  - button "Actions" [ref=e346]:
+                    - img [ref=e347]
+                    - text: Actions
+                    - img [ref=e351]
+            - row "Select 2015 Ford Ranger Wildtrak 2015 Ford Ranger Wildtrak 2015 Ford Ranger Wildtrak CAR-009 - 2015 - Automatic - Mombasa Showroom Published Featured Ksh 2,500,000 156,000 km Diesel 8 Mar 2026 Edit Actions" [ref=e353]:
+              - cell "Select 2015 Ford Ranger Wildtrak" [ref=e354]:
+                - checkbox "Select 2015 Ford Ranger Wildtrak" [ref=e355]
+              - cell "2015 Ford Ranger Wildtrak" [ref=e356]:
+                - img "2015 Ford Ranger Wildtrak" [ref=e358]
+              - cell "2015 Ford Ranger Wildtrak CAR-009 - 2015 - Automatic - Mombasa Showroom" [ref=e359]:
+                - paragraph [ref=e360]: 2015 Ford Ranger Wildtrak
+                - paragraph [ref=e361]: CAR-009 - 2015 - Automatic - Mombasa Showroom
+              - cell "Published Featured" [ref=e362]:
+                - generic [ref=e363]:
+                  - generic [ref=e364]: Published
+                  - generic [ref=e365]: Featured
+              - cell "Ksh 2,500,000" [ref=e366]
+              - cell "156,000 km" [ref=e367]
+              - cell "Diesel" [ref=e368]
+              - cell "8 Mar 2026" [ref=e369]
+              - cell "Edit Actions" [ref=e370]:
+                - generic [ref=e371]:
+                  - link "Edit" [ref=e372] [cursor=pointer]:
+                    - /url: /admin/vehicles/10000000-0000-0000-0000-000000000009
+                  - button "Actions" [ref=e375]:
+                    - img [ref=e376]
+                    - text: Actions
+                    - img [ref=e380]
+            - row "Select 2014 Subaru Forester 2014 Subaru Forester 2014 Subaru Forester CAR-008 - 2014 - Automatic - Mombasa Showroom Published Trade-in Ksh 1,790,000 129,000 km Petrol 8 Mar 2026 Edit Actions" [ref=e382]:
+              - cell "Select 2014 Subaru Forester" [ref=e383]:
+                - checkbox "Select 2014 Subaru Forester" [ref=e384]
+              - cell "2014 Subaru Forester" [ref=e385]:
+                - img "2014 Subaru Forester" [ref=e387]
+              - cell "2014 Subaru Forester CAR-008 - 2014 - Automatic - Mombasa Showroom" [ref=e388]:
+                - paragraph [ref=e389]: 2014 Subaru Forester
+                - paragraph [ref=e390]: CAR-008 - 2014 - Automatic - Mombasa Showroom
+              - cell "Published Trade-in" [ref=e391]:
+                - generic [ref=e392]:
+                  - generic [ref=e393]: Published
+                  - generic [ref=e394]: Trade-in
+              - cell "Ksh 1,790,000" [ref=e395]
+              - cell "129,000 km" [ref=e396]
+              - cell "Petrol" [ref=e397]
+              - cell "8 Mar 2026" [ref=e398]
+              - cell "Edit Actions" [ref=e399]:
+                - generic [ref=e400]:
+                  - link "Edit" [ref=e401] [cursor=pointer]:
+                    - /url: /admin/vehicles/10000000-0000-0000-0000-000000000010
+                  - button "Actions" [ref=e404]:
+                    - img [ref=e405]
+                    - text: Actions
+                    - img [ref=e409]
+        - generic [ref=e411]:
+          - paragraph [ref=e412]: Showing 1-10 of 18 vehicles
+          - navigation "Inventory pages" [ref=e413]:
+            - generic [ref=e414]: Previous
+            - link "1" [ref=e416] [cursor=pointer]:
+              - /url: /admin/vehicles
+            - link "2" [ref=e418] [cursor=pointer]:
+              - /url: /admin/vehicles?page=2
+            - link "Next" [ref=e419] [cursor=pointer]:
+              - /url: /admin/vehicles?page=2
+  - alert [ref=e26]: Inventory | Ocean Motors Admin

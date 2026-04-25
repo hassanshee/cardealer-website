@@ -1,7 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowUp, ImagePlus, LoaderCircle, Star, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowUp,
+  Camera,
+  CheckCircle2,
+  HelpCircle,
+  LoaderCircle,
+  Star,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
@@ -27,6 +37,11 @@ import type {
   Location,
   Vehicle,
   VehicleImageInput,
+} from "@/types/dealership";
+import {
+  vehicleConditionOptions,
+  vehicleFuelTypeOptions,
+  vehicleTransmissionOptions,
 } from "@/types/dealership";
 import { cn } from "@/lib/utils";
 
@@ -64,29 +79,28 @@ type PreparedUploadPayload = {
 };
 
 const initialState: ActionState = { success: false, message: "" };
+const designInputClassName =
+  "h-10 w-full rounded-lg border border-[#c5c6cf] bg-white px-2.5 text-sm text-[#141d23] shadow-none outline-none focus-visible:border-[#1a2b4b] focus-visible:ring-0";
 const selectClassName =
-  "h-12 w-full rounded-2xl border border-border bg-white px-4 text-sm text-stone-900 outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20";
+  "h-10 w-full rounded-lg border border-[#c5c6cf] bg-white px-2.5 text-sm text-[#141d23] shadow-none outline-none focus-visible:border-[#1a2b4b] focus-visible:ring-0";
 const unsavedChangesMessage =
   "You have unsaved changes. Leave the editor without saving?";
 
-const editorSections = [
-  { id: "basics", label: "Basics" },
-  { id: "listing-setup", label: "Listing setup" },
-  { id: "gallery", label: "Gallery" },
-  { id: "vehicle-details", label: "Vehicle details" },
-  { id: "description", label: "Description" },
-  { id: "quick-fill", label: "Quick fill" },
-] as const;
+const requiredFieldNames = new Set([
+  "make",
+  "model",
+  "year",
+  "price",
+  "condition",
+  "mileage",
+  "transmission",
+  "fuelType",
+  "description",
+]);
 
-const conditionOptions = [
-  "Foreign used",
-  "Locally used",
-  "Brand new",
-  "Trade-in unit",
-];
-
-const transmissionOptions = ["Automatic", "Manual", "CVT"];
-const fuelTypeOptions = ["Petrol", "Diesel", "Hybrid", "Electric"];
+const conditionOptions = vehicleConditionOptions;
+const transmissionOptions = vehicleTransmissionOptions;
+const fuelTypeOptions = vehicleFuelTypeOptions;
 const driveTypeOptions = ["2WD", "4WD", "AWD", "RWD", "FWD"];
 const bodyTypeOptions = ["SUV", "Sedan", "Pickup", "Hatchback", "Van", "Coupe"];
 const commonMakes = [
@@ -157,6 +171,21 @@ function makeEditableImages(vehicle?: Vehicle | null): EditableImage[] {
   }));
 }
 
+function makeEditableImagesFromSaved(
+  savedImages: VehicleImageInput[],
+): EditableImage[] {
+  return savedImages.map((image) => ({
+    imageUrl: image.imageUrl,
+    altText: image.altText,
+    cloudinaryPublicId: image.cloudinaryPublicId,
+    sortOrder: image.sortOrder,
+    isHero: image.isHero,
+    uploadState: "uploaded",
+    sourceUrl: null,
+    pendingFileId: null,
+  }));
+}
+
 function getImageLabel(imageUrl: string, fallbackIndex: number) {
   try {
     const pathname = new URL(imageUrl).pathname;
@@ -171,13 +200,14 @@ function getImageLabel(imageUrl: string, fallbackIndex: number) {
 function FormSection({
   id,
   title,
-  description,
+  summary,
   children,
   className,
 }: {
   id: string;
   title: string;
-  description: string;
+  description?: string;
+  summary?: string;
   children: React.ReactNode;
   className?: string;
 }) {
@@ -185,16 +215,47 @@ function FormSection({
     <section
       id={id}
       className={cn(
-        "scroll-mt-32 space-y-4 border-t border-border/70 pt-6 first:border-t-0 first:pt-0 lg:scroll-mt-24",
+        "scroll-mt-20 space-y-4 rounded-xl border border-[#c5c6cf] bg-white p-4 shadow-[0_2px_4px_rgba(3,22,53,0.05)]",
         className,
       )}
     >
-      <div className="space-y-1">
-        <h3 className="text-base font-semibold text-stone-950">{title}</h3>
-        <p className="text-sm text-stone-600">{description}</p>
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-lg font-semibold leading-6 text-[#031635]">
+            {title}
+        </h3>
+        {summary ? (
+          <span className="shrink-0 text-[11px] font-semibold leading-4 tracking-[0.03em] text-[#44474e]">
+            {summary}
+          </span>
+        ) : null}
       </div>
       {children}
     </section>
+  );
+}
+
+function RequiredMark() {
+  return (
+    <span className="ml-1 text-danger" aria-hidden="true">
+      *
+    </span>
+  );
+}
+
+function FieldLabel({
+  children,
+  htmlFor,
+  required,
+}: {
+  children: React.ReactNode;
+  htmlFor: string;
+  required?: boolean;
+}) {
+  return (
+    <Label htmlFor={htmlFor} className="text-sm font-medium leading-5 text-[#44474e]">
+      {children}
+      {required ? <RequiredMark /> : null}
+    </Label>
   );
 }
 
@@ -210,6 +271,7 @@ export function VehicleForm({
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [isSubmitting, startSubmitting] = useTransition();
+  const [isSaving, setIsSaving] = useState(false);
   const [state, setState] = useState<ActionState>(initialState);
   const [successNotice, setSuccessNotice] = useState(initialNotice || "");
   const [images, setImages] = useState<EditableImage[]>(() =>
@@ -232,14 +294,13 @@ export function VehicleForm({
     description: "",
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [lastSavedAt, setLastSavedAt] = useState<string | null>(
-    initialNotice ? new Date().toISOString() : null,
-  );
   const filePickerRef = useRef<HTMLInputElement>(null);
+  const isSavingRef = useRef(false);
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const pendingFilesRef = useRef<PendingFile[]>([]);
   const normalizedImages = useMemo(() => normalizeImages(images), [images]);
   const isEditing = Boolean(vehicle?.id);
+  const formId = isEditing ? "vehicle-edit-form" : "vehicle-create-form";
 
   function normalizeImages(nextImages: EditableImage[]) {
     const heroIndex = nextImages.findIndex((image) => image.isHero);
@@ -275,7 +336,6 @@ export function VehicleForm({
     }
 
     setSuccessNotice(initialNotice);
-    setLastSavedAt(new Date().toISOString());
     setHasUnsavedChanges(false);
   }, [initialNotice]);
 
@@ -468,6 +528,28 @@ export function VehicleForm({
     return unique.length > 1 ? unique.join("/") : unique[0];
   }
 
+  function extractMileage(text: string) {
+    const abbreviatedMatch = text.match(
+      /\b(\d+(?:\.\d+)?)\s*k\s*(?:km|kms|kilometres|kilometers)\b/i,
+    );
+
+    if (abbreviatedMatch) {
+      return Math.round(Number(abbreviatedMatch[1]) * 1000);
+    }
+
+    const mileageMatch =
+      text.match(
+        /\b([0-9][0-9,\s]*)\s*(?:km|kms|kilometres|kilometers)\b/i,
+      ) || text.match(/\bmileage\b[^0-9]*([0-9][0-9,\s]*)/i);
+
+    if (!mileageMatch) {
+      return null;
+    }
+
+    const value = Number(mileageMatch[1].replace(/[,\s]/g, ""));
+    return Number.isFinite(value) ? value : null;
+  }
+
   function extractCondition(text: string) {
     if (/traded[-\s]?in/i.test(text)) {
       return "Trade-in unit";
@@ -536,11 +618,53 @@ export function VehicleForm({
       const make = commonMakes.find(
         (value) => value.toLowerCase() === tokens[makeIndex]?.toLowerCase(),
       );
-      const model = tokens
-        .slice(makeIndex + 1)
-        .filter((token) => !/^(19|20)\d{2}$/.test(token))
-        .join(" ")
-        .trim();
+      const modelBoundaryTokens = new Set([
+        "petrol",
+        "diesel",
+        "hybrid",
+        "electric",
+        "automatic",
+        "manual",
+        "auto",
+        "cvt",
+        "kes",
+        "ksh",
+        "kshs",
+        "km",
+        "kms",
+        "mileage",
+        "price",
+        "offer",
+        "very",
+        "clean",
+        "foreign",
+        "locally",
+        "used",
+        "mombasa",
+        "miritini",
+        "nairobi",
+      ]);
+      const modelTokens: string[] = [];
+
+      for (const token of tokens.slice(makeIndex + 1)) {
+        const normalizedToken = token.toLowerCase();
+
+        if (
+          /^(19|20)\d{2}$/.test(token) ||
+          /^\d/.test(token) ||
+          modelBoundaryTokens.has(normalizedToken)
+        ) {
+          break;
+        }
+
+        modelTokens.push(token);
+
+        if (modelTokens.length >= 4) {
+          break;
+        }
+      }
+
+      const model = modelTokens.join(" ").trim();
       return {
         make: make || tokens[makeIndex],
         model: model || undefined,
@@ -628,6 +752,7 @@ export function VehicleForm({
     const negotiable = /negotiable|best offer|neg\b/i.test(normalized);
     const condition = extractCondition(normalized) || undefined;
     const engineCapacity = extractEngineCapacity(normalized) || undefined;
+    const mileage = extractMileage(normalized) || undefined;
     const fuelType = extractFuelType(normalized) || undefined;
     const transmission = extractTransmission(normalized) || undefined;
     const driveType = extractDriveType(upper) || undefined;
@@ -689,6 +814,7 @@ export function VehicleForm({
       title: title || undefined,
       priceKes,
       condition,
+      mileage,
       transmission,
       fuelType,
       driveType,
@@ -848,6 +974,7 @@ export function VehicleForm({
       parsed.year ? "year" : null,
       parsed.priceKes ? "price" : null,
       parsed.engineCapacity ? "engine" : null,
+      parsed.mileage ? "mileage" : null,
       parsed.fuelType ? "fuel" : null,
       parsed.locationId ? "location" : null,
     ].filter(Boolean);
@@ -863,13 +990,10 @@ export function VehicleForm({
     const missing: string[] = [];
 
     const missingNumber = (value: string) => {
-      const numeric = Number(value);
+      const numeric = Number(value.replace(/[,\s]/g, ""));
       return !value || Number.isNaN(numeric) || numeric <= 0;
     };
 
-    if (!title.trim()) {
-      missing.push("Title");
-    }
     if (!make.trim()) {
       missing.push("Make");
     }
@@ -886,7 +1010,10 @@ export function VehicleForm({
     if (!requiredSnapshot.condition.trim()) {
       missing.push("Condition");
     }
-    if (missingNumber(requiredSnapshot.mileage)) {
+    if (
+      !requiredSnapshot.mileage ||
+      Number.isNaN(Number(requiredSnapshot.mileage.replace(/[,\s]/g, "")))
+    ) {
       missing.push("Mileage");
     }
     if (!requiredSnapshot.transmission.trim()) {
@@ -900,34 +1027,84 @@ export function VehicleForm({
     }
 
     return missing;
-  }, [make, model, requiredSnapshot, title, year]);
+  }, [make, model, requiredSnapshot, year]);
 
-  function getSaveStatusLabel() {
-    if (isSubmitting) {
-      return "Saving changes";
+  const hasDraftProgress = useMemo(
+    () =>
+      Boolean(
+        title.trim() ||
+          make.trim() ||
+          model.trim() ||
+          year.trim() ||
+          requiredSnapshot.price.trim() ||
+          requiredSnapshot.condition.trim() ||
+          requiredSnapshot.mileage.trim() ||
+          requiredSnapshot.transmission.trim() ||
+          requiredSnapshot.fuelType.trim() ||
+          requiredSnapshot.description.trim() ||
+          quickPaste.trim() ||
+          normalizedImages.length,
+      ),
+    [make, model, normalizedImages.length, quickPaste, requiredSnapshot, title, year],
+  );
+
+  const saveDisabled =
+    isSaving || isSubmitting || (isEditing ? !hasUnsavedChanges : !hasDraftProgress);
+  const hasSaveError = Boolean(state.message && !state.success);
+
+  function focusFieldByName(name: string) {
+    const form = formRef.current;
+
+    if (!form) {
+      return;
     }
 
-    if (hasUnsavedChanges) {
-      return "Unsaved changes";
+    if (name === "images") {
+      const gallerySection = document.getElementById("vehicle-gallery");
+      if (
+        gallerySection &&
+        "scrollIntoView" in gallerySection &&
+        typeof gallerySection.scrollIntoView === "function"
+      ) {
+        gallerySection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      const galleryInput =
+        (form.elements.namedItem("manual-image") as HTMLInputElement | null) ||
+        document.getElementById("manual-image");
+      if (galleryInput instanceof HTMLInputElement) {
+        galleryInput.focus();
+      }
+      return;
     }
 
-    if (lastSavedAt) {
-      return "Saved just now";
-    }
+    const field =
+      form.elements.namedItem(name) ||
+      document.getElementById(name);
 
-    return isEditing ? "No unsaved changes" : "Ready to create";
+    if (
+      field instanceof HTMLInputElement ||
+      field instanceof HTMLTextAreaElement ||
+      field instanceof HTMLSelectElement
+    ) {
+      if ("scrollIntoView" in field && typeof field.scrollIntoView === "function") {
+        field.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      field.focus();
+    }
   }
 
-  function getSaveStatusVariant() {
-    if (isSubmitting) {
-      return "accent" as const;
+  function focusFirstInvalidField(fieldErrors?: Record<string, string[]>) {
+    const firstInvalidField = Object.keys(fieldErrors || {}).find(
+      (name) => fieldErrors?.[name]?.length,
+    );
+
+    if (!firstInvalidField) {
+      return;
     }
 
-    if (hasUnsavedChanges) {
-      return "muted" as const;
-    }
-
-    return "success" as const;
+    requestAnimationFrame(() => {
+      focusFieldByName(firstInvalidField);
+    });
   }
 
   function ensureImageLimit(nextCount: number) {
@@ -1055,7 +1232,13 @@ export function VehicleForm({
 
   function reconcileSavedImages(
     uploadedByPendingId: Map<string, UploadedPendingFile>,
+    savedImages?: VehicleImageInput[],
   ) {
+    if (savedImages) {
+      setImages(normalizeImages(makeEditableImagesFromSaved(savedImages)));
+      return;
+    }
+
     setImages((current) =>
       normalizeImages(
         current.map((image) => {
@@ -1185,17 +1368,18 @@ export function VehicleForm({
       }
 
       if (result.success) {
-        reconcileSavedImages(uploadedByPendingId);
+        reconcileSavedImages(uploadedByPendingId, result.savedImages);
         clearPendingFiles();
         setState(initialState);
         setHasUnsavedChanges(false);
-        setLastSavedAt(new Date().toISOString());
         setSuccessNotice(result.message || "Vehicle saved successfully.");
         captureRequiredSnapshot();
+        router.refresh();
         return;
       }
 
       setState(result);
+      focusFirstInvalidField(result.fieldErrors);
     } catch (error) {
       setGlobalError(
         error instanceof Error
@@ -1207,8 +1391,17 @@ export function VehicleForm({
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isSavingRef.current) {
+      return;
+    }
+
+    isSavingRef.current = true;
+    setIsSaving(true);
     startSubmitting(() => {
-      void submitVehicleForm();
+      void submitVehicleForm().finally(() => {
+        isSavingRef.current = false;
+        setIsSaving(false);
+      });
     });
   }
 
@@ -1294,10 +1487,11 @@ export function VehicleForm({
 
       const nextPendingFiles = Array.from(files).map((file) => {
         validateVehicleImageUpload(file);
-const pendingFileId =
-  typeof crypto !== "undefined" && crypto.randomUUID
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        const pendingFileId =
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
         return {
           id: pendingFileId,
           file,
@@ -1392,84 +1586,121 @@ const pendingFileId =
   }
 
   return (
-    <Card className="rounded-[28px] p-5 sm:p-6">
+    <Card className="-mx-4 -mt-4 min-h-screen rounded-none border-0 bg-[#f6faff] p-0 font-sans text-[#141d23] shadow-none sm:-mx-6 lg:mx-auto lg:mt-0 lg:min-h-0 lg:max-w-xl lg:rounded-xl">
+      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-[#e9ecef] bg-[#f8f9fa] px-4 text-[#1a2b4b] shadow-sm lg:hidden">
+        <button
+          type="button"
+          className="inline-flex min-h-10 items-center gap-2 text-sm font-medium text-[#44474e]"
+          onClick={handleReturnToInventory}
+        >
+          <ArrowLeft className="size-5 text-[#141d23]" />
+          Return to inventory
+        </button>
+        <HelpCircle className="size-5 text-[#44474e]" aria-hidden="true" />
+      </div>
       <form
+        id={formId}
         ref={formRef}
         onSubmit={handleSubmit}
         onChangeCapture={handleFormChangeCapture}
-        className="flex flex-col gap-7"
+        className="mx-auto flex w-full max-w-[360px] flex-col gap-6 px-4 pb-32 pt-20 lg:max-w-xl lg:px-0 lg:pt-0"
       >
         <input type="hidden" name="id" value={vehicle?.id || ""} />
 
-        <div className="sticky top-[4.75rem] z-20 rounded-[28px] border border-white/80 bg-white/96 px-4 py-3 shadow-[0_18px_42px_rgba(15,23,42,0.08)] backdrop-blur lg:top-6 sm:px-5 sm:py-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-2 sm:space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={getSaveStatusVariant()}>{getSaveStatusLabel()}</Badge>
-                {vehicle?.stockCode ? (
-                  <Badge variant="muted">Stock {vehicle.stockCode}</Badge>
-                ) : null}
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-stone-950">
-                  {isEditing
-                    ? "Stay in the editor while you update the listing."
-                    : "The first save creates the listing and keeps you inside the editor."}
-                </p>
-                <p className="mt-1 hidden text-sm text-stone-600 sm:block">
-                  Use the section links below to jump between content blocks without
-                  losing your place.
-                </p>
-              </div>
-            </div>
+        <section className="space-y-1">
+          <h2 className="text-2xl font-semibold leading-8 tracking-[-0.01em] text-[#031635]">
+            {isEditing ? "Edit vehicle" : "Create vehicle"}
+          </h2>
+          <p className="text-sm leading-5 text-[#44474e]">
+            Paste a dealer message, add photos, then review the essentials.
+          </p>
+        </section>
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Button
-                type="button"
-                variant="secondary"
-                className="w-full sm:w-auto"
-                onClick={handleReturnToInventory}
-              >
-                Return to inventory
-              </Button>
-              <Button type="submit" className="w-full sm:w-auto" disabled={isSubmitting}>
-                {isSubmitting ? <LoaderCircle className="size-4 animate-spin" /> : null}
-                {isEditing ? "Save changes" : "Save vehicle"}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <nav
-          aria-label="Vehicle editor sections"
-          className="flex flex-wrap gap-2 rounded-[26px] border border-border/70 bg-stone-50/90 p-3"
-        >
-          {editorSections.map((section) => (
-            <a
-              key={section.id}
-              href={`#${section.id}`}
-              className="rounded-full border border-border/70 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-600 transition-colors hover:border-primary/25 hover:text-stone-950"
+        <section className="flex items-center justify-between rounded-xl border border-[#c5c6cf] bg-white p-4 shadow-[0_2px_4px_rgba(3,22,53,0.05)]">
+          <div className="flex items-center gap-2">
+            {hasSaveError || requiredMissing.length ? (
+              <AlertCircle className="size-5 text-[#5d4217]" />
+            ) : (
+              <CheckCircle2 className="size-5 fill-green-600 text-green-600" />
+            )}
+            <span
+              className={cn(
+                "text-sm font-medium leading-5",
+                hasSaveError || requiredMissing.length
+                  ? "text-[#5d4217]"
+                  : "text-green-700",
+              )}
             >
-              {section.label}
-            </a>
-          ))}
-        </nav>
+              {hasSaveError
+                ? "Needs review"
+                : isSaving || isSubmitting
+                  ? "Saving changes"
+                  : "Ready to create"}
+            </span>
+          </div>
+          <span className="rounded-full bg-[#e8c08a]/20 px-3 py-1 text-[11px] font-semibold leading-4 tracking-[0.03em] text-[#5d4217]">
+            {requiredMissing.length
+              ? `${requiredMissing.length} missing`
+              : "Ready"}
+          </span>
+        </section>
 
-        {requiredMissing.length ? (
-          <div className="rounded-[20px] border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 sm:hidden">
-            <p className="font-semibold">Missing required fields</p>
-            <p className="mt-1">
-              {requiredMissing.slice(0, 3).join(", ")}
-              {requiredMissing.length > 3
-                ? ` +${requiredMissing.length - 3} more`
-                : ""}
-            </p>
+        <section
+          id="vehicle-quick-fill"
+          className="space-y-4 rounded-xl border border-[#c5c6cf] bg-white p-4 shadow-[0_2px_4px_rgba(3,22,53,0.05)]"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium leading-5 tracking-[0.01em] text-[#031635]">
+              Quick Fill
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#25D366]/10 px-2 py-0.5 text-[11px] font-semibold leading-4 tracking-[0.03em] text-[#075E54]">
+                <span className="size-2 rounded-sm bg-[#075E54]" />
+                WhatsApp
+            </span>
           </div>
-        ) : (
-          <div className="rounded-[20px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800 sm:hidden">
-            All required fields are filled.
+          <div className="space-y-1">
+            <Label htmlFor="quick-paste" className="text-sm font-medium leading-5 text-[#44474e]">
+              Dealer message
+            </Label>
+            <Textarea
+              id="quick-paste"
+              value={quickPaste}
+              onChange={(event) => {
+                setQuickPaste(event.target.value);
+                if (quickPasteNotice) {
+                  setQuickPasteNotice("");
+                }
+              }}
+              placeholder="Toyota Harrier 2017 2.5L petrol, auto, 83k km, Ksh 3.4M, Mombasa..."
+              className="min-h-[100px] resize-none rounded-lg border-[#c5c6cf] bg-white p-2 text-xs leading-4 focus-visible:border-[#1a2b4b] focus-visible:ring-0"
+            />
           </div>
-        )}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              className="h-12 flex-1 rounded-lg border-[#1a2b4b] bg-[#1a2b4b] text-sm font-semibold text-white shadow-none hover:border-[#031635] hover:bg-[#031635]"
+              onClick={handleQuickPaste}
+            >
+              Parse & fill
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className="h-12 rounded-lg border-[#c5c6cf] bg-white px-4 text-sm font-medium text-[#5c5f60] shadow-none hover:bg-white"
+              onClick={() => {
+                setQuickPaste("");
+                setQuickPasteNotice("");
+              }}
+            >
+              Clear paste
+            </Button>
+          </div>
+          {quickPasteNotice ? (
+            <div className="rounded-lg border border-[#c5c6cf] bg-[#ecf5fe] px-3 py-2 text-xs leading-4 text-[#44474e]">
+              {quickPasteNotice}
+            </div>
+          ) : null}
+        </section>
 
         {successNotice ? (
           <div className="rounded-[24px] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm font-medium text-emerald-800">
@@ -1487,101 +1718,16 @@ const pendingFileId =
         ) : null}
 
         <FormSection
-          id="quick-fill"
-          title="Quick fill helper"
-          description="Use this only when you already have a dealer message to parse. The normal workflow starts with the fields above."
-          className="order-6"
+          id="vehicle-basics"
+          title="Basic Details"
+          description="Start with the identifiers a broker needs when adding a vehicle from a phone."
+          className="order-2"
         >
-          <details className="rounded-[24px] border border-border/70 bg-stone-50/80 px-4 py-4">
-            <summary className="cursor-pointer list-none text-sm font-semibold text-stone-950">
-              Open quick fill helper
-            </summary>
-            <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-              <div>
-                <Label htmlFor="quick-paste">Paste dealer message</Label>
-                <Textarea
-                  id="quick-paste"
-                  value={quickPaste}
-                  onChange={(event) => {
-                    setQuickPaste(event.target.value);
-                    if (quickPasteNotice) {
-                      setQuickPasteNotice("");
-                    }
-                  }}
-                  placeholder="Paste the dealer message here..."
-                  className="min-h-32"
-                />
-                <p className="mt-2 text-xs text-stone-500">
-                  We detect make, model, year, price, engine cc, fuel, condition, and
-                  location when possible.
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row lg:flex-col lg:items-stretch">
-                <Button type="button" onClick={handleQuickPaste}>
-                  Parse & fill
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    setQuickPaste("");
-                    setQuickPasteNotice("");
-                  }}
-                >
-                  Clear paste
-                </Button>
-              </div>
-            </div>
-            {quickPasteNotice ? (
-              <div className="mt-4 rounded-[18px] border border-border/70 bg-white px-4 py-3 text-xs text-stone-600">
-                {quickPasteNotice}
-              </div>
-            ) : null}
-          </details>
-        </FormSection>
-
-        <FormSection
-          id="basics"
-          title="Basics"
-          description="Keep the key listing fields fast to fill. The reference code and vehicle URL are managed automatically."
-          className="order-1"
-        >
-          <div className="grid gap-4 xl:grid-cols-3">
-            <div className="xl:col-span-2">
-              <Label htmlFor="title">Listing title</Label>
-              <Input
-                id="title"
-                name="title"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="2018 Range Rover Vogue"
-                {...getFieldProps("title")}
-              />
-              <FieldError
-                id={getFieldErrorId("title")}
-                error={getFieldError("title")}
-              />
-            </div>
-            <div>
-              <Label htmlFor="year">Year</Label>
-              <Input
-                id="year"
-                name="year"
-                type="number"
-                value={year}
-                onChange={(event) => setYear(event.target.value)}
-                placeholder="2018"
-                min={1990}
-                max={new Date().getFullYear() + 1}
-                {...getFieldProps("year")}
-              />
-              <FieldError
-                id={getFieldErrorId("year")}
-                error={getFieldError("year")}
-              />
-            </div>
-            <div>
-              <Label htmlFor="make">Make</Label>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <FieldLabel htmlFor="make" required={requiredFieldNames.has("make")}>
+                Make
+              </FieldLabel>
               <Input
                 id="make"
                 name="make"
@@ -1589,101 +1735,477 @@ const pendingFileId =
                 onChange={(event) => setMake(event.target.value)}
                 placeholder="Toyota"
                 list="vehicle-make-options"
-                {...getFieldProps("make")}
+                className={cn(designInputClassName, getFieldProps("make").className)}
+                aria-invalid={getFieldProps("make")["aria-invalid"]}
+                aria-describedby={getFieldProps("make")["aria-describedby"]}
               />
               <FieldError
                 id={getFieldErrorId("make")}
                 error={getFieldError("make")}
               />
             </div>
-            <div>
-              <Label htmlFor="model">Model</Label>
+            <div className="space-y-1">
+              <FieldLabel htmlFor="model" required={requiredFieldNames.has("model")}>
+                Model
+              </FieldLabel>
               <Input
                 id="model"
                 name="model"
                 value={model}
                 onChange={(event) => setModel(event.target.value)}
                 placeholder="Land Cruiser V8"
-                {...getFieldProps("model")}
+                className={cn(designInputClassName, getFieldProps("model").className)}
+                aria-invalid={getFieldProps("model")["aria-invalid"]}
+                aria-describedby={getFieldProps("model")["aria-describedby"]}
               />
               <FieldError
                 id={getFieldErrorId("model")}
                 error={getFieldError("model")}
               />
             </div>
-            <div className="rounded-3xl border border-dashed border-border/70 bg-stone-50 px-4 py-3 text-sm text-stone-600 xl:col-span-3">
-              The system keeps the stock code and public vehicle URL in sync
-              automatically when you save this listing.
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <FieldLabel htmlFor="year" required={requiredFieldNames.has("year")}>
+                  Year
+                </FieldLabel>
+                <Input
+                  id="year"
+                  name="year"
+                  type="number"
+                  value={year}
+                  onChange={(event) => setYear(event.target.value)}
+                  placeholder="2018"
+                  min={1990}
+                  max={new Date().getFullYear() + 1}
+                  className={cn(designInputClassName, getFieldProps("year").className)}
+                  aria-invalid={getFieldProps("year")["aria-invalid"]}
+                  aria-describedby={getFieldProps("year")["aria-describedby"]}
+                />
+                <FieldError
+                  id={getFieldErrorId("year")}
+                  error={getFieldError("year")}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label
+                  htmlFor="locationId"
+                  className="text-sm font-medium leading-5 text-[#44474e]"
+                >
+                  Location
+                </Label>
+                <select
+                  id="locationId"
+                  name="locationId"
+                  defaultValue={vehicle?.locationId || ""}
+                  className={cn(selectClassName, getFieldProps("locationId").className)}
+                  aria-invalid={getFieldProps("locationId")["aria-invalid"]}
+                  aria-describedby={getFieldProps("locationId")["aria-describedby"]}
+                >
+                  <option value="">Select</option>
+                  {locations.map((location) => (
+                    <option key={location.id} value={location.id}>
+                      {location.city || location.name}
+                    </option>
+                  ))}
+                </select>
+                <FieldError
+                  id={getFieldErrorId("locationId")}
+                  error={getFieldError("locationId")}
+                />
+              </div>
             </div>
+            <input type="hidden" name="title" value={title} />
           </div>
         </FormSection>
 
         <FormSection
-          id="listing-setup"
-          title="Listing setup"
-          description="These fields control how the vehicle appears in admin and on the live site."
-          className="order-2"
+          id="vehicle-price"
+          title="Price"
+          description="Use full KES amounts. Commas are accepted for faster phone entry."
+          className="order-3"
         >
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div>
-              <Label htmlFor="price">Price</Label>
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <FieldLabel htmlFor="price" required={requiredFieldNames.has("price")}>
+                Price (Ksh)
+              </FieldLabel>
               <Input
                 id="price"
                 name="price"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 defaultValue={vehicle?.price}
-                placeholder="2790000"
-                min={0}
-                step={1000}
-                {...getFieldProps("price")}
+                placeholder="2,790,000"
+                className={cn(
+                  designInputClassName,
+                  "font-semibold",
+                  getFieldProps("price").className,
+                )}
+                aria-invalid={getFieldProps("price")["aria-invalid"]}
+                aria-describedby={getFieldProps("price")["aria-describedby"]}
               />
-              <p className="mt-2 text-xs text-stone-500">
-                Enter the full price in KES (example: 2,790,000).
-              </p>
               <FieldError
                 id={getFieldErrorId("price")}
                 error={getFieldError("price")}
               />
             </div>
-            <div>
-              <Label htmlFor="condition">Condition</Label>
-              <Input
+            <div className="space-y-1">
+              <FieldLabel
+                htmlFor="condition"
+                required={requiredFieldNames.has("condition")}
+              >
+                Condition
+              </FieldLabel>
+              <select
                 id="condition"
                 name="condition"
                 defaultValue={vehicle?.condition}
-                list="vehicle-condition-options"
-                placeholder="Foreign used"
-                {...getFieldProps("condition")}
-              />
+                className={cn(selectClassName, getFieldProps("condition").className)}
+                aria-invalid={getFieldProps("condition")["aria-invalid"]}
+                aria-describedby={getFieldProps("condition")["aria-describedby"]}
+              >
+                <option value="">Select condition</option>
+                {conditionOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
               <FieldError
                 id={getFieldErrorId("condition")}
                 error={getFieldError("condition")}
               />
             </div>
-            <div>
-              <Label htmlFor="locationId">Location</Label>
-              <select
-                id="locationId"
-                name="locationId"
-                defaultValue={vehicle?.locationId || ""}
-                className={cn(selectClassName, getFieldProps("locationId").className)}
-                aria-invalid={getFieldProps("locationId")["aria-invalid"]}
-                aria-describedby={getFieldProps("locationId")["aria-describedby"]}
+            <label className="flex min-h-6 cursor-pointer items-center gap-2 text-sm leading-5 text-[#141d23]">
+              <input
+                type="checkbox"
+                name="negotiable"
+                defaultChecked={vehicle?.negotiable}
+                className="size-5 rounded border-[#c5c6cf] text-[#1a2b4b] focus:ring-[#1a2b4b]"
+              />
+              Price negotiable
+            </label>
+          </div>
+        </FormSection>
+
+        <FormSection
+          id="vehicle-specs"
+          title="Specs"
+          description="Use the common options for speed, but keep the fields open for custom entries when needed."
+          className="order-4"
+        >
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <FieldLabel
+                htmlFor="mileage"
+                required={requiredFieldNames.has("mileage")}
               >
-                <option value="">Select location</option>
-                {locations.map((location) => (
-                  <option key={location.id} value={location.id}>
-                    {location.name}
-                  </option>
-                ))}
-              </select>
+                Mileage (km)
+              </FieldLabel>
+              <Input
+                id="mileage"
+                name="mileage"
+                type="text"
+                inputMode="numeric"
+                defaultValue={vehicle?.mileage}
+                placeholder="85000"
+                className={cn(
+                  designInputClassName,
+                  getFieldProps("mileage").className,
+                )}
+                aria-invalid={getFieldProps("mileage")["aria-invalid"]}
+                aria-describedby={getFieldProps("mileage")["aria-describedby"]}
+              />
               <FieldError
-                id={getFieldErrorId("locationId")}
-                error={getFieldError("locationId")}
+                id={getFieldErrorId("mileage")}
+                error={getFieldError("mileage")}
               />
             </div>
-            <div>
-              <Label htmlFor="status">Status</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <FieldLabel
+                  htmlFor="transmission"
+                  required={requiredFieldNames.has("transmission")}
+                >
+                  Transmission
+                </FieldLabel>
+                <select
+                  id="transmission"
+                  name="transmission"
+                  defaultValue={vehicle?.transmission || ""}
+                  className={cn(
+                    selectClassName,
+                    getFieldProps("transmission").className,
+                  )}
+                  aria-invalid={getFieldProps("transmission")["aria-invalid"]}
+                  aria-describedby={getFieldProps("transmission")["aria-describedby"]}
+                >
+                  <option value="">Select</option>
+                  {transmissionOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <FieldError
+                  id={getFieldErrorId("transmission")}
+                  error={getFieldError("transmission")}
+                />
+              </div>
+              <div className="space-y-1">
+                <FieldLabel
+                  htmlFor="fuelType"
+                  required={requiredFieldNames.has("fuelType")}
+                >
+                  Fuel type
+                </FieldLabel>
+                <select
+                  id="fuelType"
+                  name="fuelType"
+                  defaultValue={vehicle?.fuelType || ""}
+                  className={cn(selectClassName, getFieldProps("fuelType").className)}
+                  aria-invalid={getFieldProps("fuelType")["aria-invalid"]}
+                  aria-describedby={getFieldProps("fuelType")["aria-describedby"]}
+                >
+                  <option value="">Select</option>
+                  {fuelTypeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <FieldError
+                  id={getFieldErrorId("fuelType")}
+                  error={getFieldError("fuelType")}
+                />
+              </div>
+            </div>
+          </div>
+        </FormSection>
+
+        <div className="hidden">
+          <input name="driveType" defaultValue={vehicle?.driveType || ""} />
+          <input name="bodyType" defaultValue={vehicle?.bodyType || ""} />
+          <input name="engineCapacity" defaultValue={vehicle?.engineCapacity || ""} />
+          <input name="color" defaultValue={vehicle?.color || ""} />
+        </div>
+
+        <FormSection
+          id="vehicle-gallery"
+          title="Images"
+          description="Add listing photos from the phone gallery or from a URL."
+          summary={normalizedImages.length ? `${normalizedImages.length} staged` : "Optional draft"}
+          className="order-5"
+        >
+          <input
+            ref={filePickerRef}
+            type="file"
+            multiple
+            accept={SUPPORTED_IMAGE_MIME_TYPES.join(",")}
+            className="hidden"
+            onChange={(event) => uploadFiles(event.target.files)}
+          />
+
+          <div
+            className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-[#c5c6cf] bg-[#e6eff8] transition-colors hover:bg-[#e0e9f2]"
+            onClick={openFilePicker}
+          >
+            <button
+              type="button"
+              className="flex flex-col items-center justify-center gap-2 text-[#031635]"
+              onClick={openFilePicker}
+            >
+              <Camera className="size-9 fill-[#031635] stroke-[#031635]" />
+              <span className="text-sm font-medium leading-5">
+                Add photos from phone
+              </span>
+            </button>
+          </div>
+
+          <details className="group">
+            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-center text-sm font-medium leading-5 text-[#031635] [&::-webkit-details-marker]:hidden">
+              Add image from URL
+            </summary>
+            <div className="mt-2 grid gap-2">
+              <div className="space-y-1">
+                <Label
+                  htmlFor="manual-image"
+                  className="text-sm font-medium leading-5 text-[#44474e]"
+                >
+                  Image URL
+                </Label>
+                <Input
+                  id="manual-image"
+                  value={manualImageUrl}
+                  onChange={(event) => setManualImageUrl(event.target.value)}
+                  placeholder="https://..."
+                  className={designInputClassName}
+                  aria-describedby={
+                    uploadError || getFieldError("images")
+                      ? "vehicle-gallery-error"
+                      : undefined
+                  }
+                  aria-invalid={
+                    uploadError || getFieldError("images") ? true : undefined
+                  }
+                />
+              </div>
+              <Button
+                type="button"
+                className="h-12 rounded-lg border-[#1a2b4b] bg-[#1a2b4b] text-sm font-semibold text-white shadow-none hover:border-[#031635] hover:bg-[#031635]"
+                onClick={addManualImage}
+              >
+                Stage URL
+              </Button>
+            </div>
+          </details>
+
+          <FieldError
+            id="vehicle-gallery-error"
+            error={uploadError || getFieldError("images")}
+            className="text-sm text-red-600"
+          />
+
+          {normalizedImages.length ? (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {normalizedImages.map((image, index) => {
+                const isPending =
+                  image.uploadState === "pending_file" ||
+                  image.uploadState === "pending_url";
+
+                return (
+                  <div
+                    key={`${image.imageUrl}-${index}`}
+                    className="overflow-hidden rounded-xl border border-[#c5c6cf] bg-white shadow-[0_2px_4px_rgba(3,22,53,0.05)]"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden bg-stone-100">
+                      <Image
+                        src={image.imageUrl}
+                        alt={image.altText || "Vehicle image"}
+                        fill
+                        sizes="(max-width: 767px) 100vw, 112px"
+                        className="object-cover"
+                      />
+                      <div className="absolute left-2 top-2 flex flex-wrap gap-1.5">
+                        {image.isHero ? <Badge variant="accent">Hero</Badge> : null}
+                        <Badge variant={isPending ? "muted" : "success"}>
+                          {image.uploadState === "pending_url"
+                            ? "Imports on save"
+                            : isPending
+                              ? "Uploads on save"
+                              : "Saved"}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 p-3">
+                      <p className="truncate text-sm font-semibold text-stone-900">
+                        {getImageLabel(image.imageUrl, index)}
+                      </p>
+                      <p className="mt-1 truncate text-xs text-stone-500">
+                        {image.imageUrl}
+                      </p>
+                      <Input
+                        aria-label={`Alt text for image ${index + 1}`}
+                        placeholder="Alt text"
+                        value={image.altText || ""}
+                        onChange={(event) =>
+                          setImages((current) =>
+                            normalizeImages(
+                              current.map((item, itemIndex) =>
+                                itemIndex === index
+                                  ? { ...item, altText: event.target.value }
+                                  : item,
+                              ),
+                            ),
+                          )
+                        }
+                        className={cn(designInputClassName, "mt-3")}
+                      />
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setHero(index)}
+                          disabled={image.isHero}
+                          className="rounded-lg"
+                        >
+                          <Star className="size-4" />
+                          {image.isHero ? "Hero" : "Hero"}
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => moveImageUp(index)}
+                          disabled={index === 0}
+                          className="rounded-lg"
+                        >
+                          <ArrowUp className="size-4" />
+                          Move up
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="col-span-2 rounded-lg text-red-700 hover:bg-red-50 hover:text-red-800"
+                          onClick={() => removeImage(index)}
+                        >
+                          <Trash2 className="size-4" />
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            null
+          )}
+        </FormSection>
+
+        <FormSection
+          id="vehicle-description"
+          title="Description *"
+          description="Keep the copy short and sales-led so the website reads cleanly."
+          className="order-6"
+        >
+          <Textarea
+            id="description"
+            name="description"
+            defaultValue={vehicle?.description}
+            className={cn(
+              "min-h-[120px] resize-none rounded-lg border-[#c5c6cf] bg-white p-2 text-sm leading-5 focus-visible:border-[#1a2b4b] focus-visible:ring-0",
+              getFieldProps("description").className,
+            )}
+            placeholder="Clean unit, buy-and-drive. Well maintained with full service history..."
+            aria-invalid={getFieldProps("description")["aria-invalid"]}
+            aria-describedby={getFieldProps("description")["aria-describedby"]}
+          />
+          <FieldError
+            id={getFieldErrorId("description")}
+            error={getFieldError("description")}
+          />
+        </FormSection>
+
+        <FormSection
+          id="vehicle-status"
+          title="Listing Status"
+          description="Choose whether this listing should stay private, go live, or be marked sold."
+          className="order-7"
+        >
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label
+                htmlFor="status"
+                className="text-sm font-medium leading-5 text-[#44474e]"
+              >
+                Status
+              </Label>
               <select
                 id="status"
                 name="status"
@@ -1702,8 +2224,13 @@ const pendingFileId =
                 error={getFieldError("status")}
               />
             </div>
-            <div>
-              <Label htmlFor="stockCategory">Stock category</Label>
+            <div className="space-y-1">
+              <Label
+                htmlFor="stockCategory"
+                className="text-sm font-medium leading-5 text-[#44474e]"
+              >
+                Stock category
+              </Label>
               <select
                 id="stockCategory"
                 name="stockCategory"
@@ -1728,310 +2255,68 @@ const pendingFileId =
                 error={getFieldError("stockCategory")}
               />
             </div>
-            <label className="flex items-center gap-3 rounded-2xl border border-border bg-stone-50 px-4 py-3 text-sm font-medium text-stone-700">
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg bg-[#ecf5fe] p-2">
               <input
                 type="checkbox"
                 name="featured"
                 defaultChecked={vehicle?.featured}
-                className="size-4"
+                className="size-5 rounded border-[#c5c6cf] text-[#1a2b4b] focus:ring-[#1a2b4b]"
               />
-              Featured listing
-            </label>
-            <label className="flex items-center gap-3 rounded-2xl border border-border bg-stone-50 px-4 py-3 text-sm font-medium text-stone-700">
-              <input
-                type="checkbox"
-                name="negotiable"
-                defaultChecked={vehicle?.negotiable}
-                className="size-4"
-              />
-              Price negotiable
+              <span className="flex flex-col">
+                <span className="text-sm font-medium leading-5 text-[#031635]">
+                  Featured listing
+                </span>
+                <span className="text-xs leading-4 text-[#44474e]">
+                  Show at top of dealer page
+                </span>
+              </span>
             </label>
           </div>
         </FormSection>
 
-        <FormSection
-          id="vehicle-details"
-          title="Vehicle details"
-          description="Use the common options for speed, but keep the fields open for custom entries when needed."
-          className="order-4 lg:order-3"
-        >
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <div>
-              <Label htmlFor="mileage">Mileage (km)</Label>
-              <Input
-                id="mileage"
-                name="mileage"
-                type="number"
-                defaultValue={vehicle?.mileage}
-                placeholder="85000"
-                min={0}
-                {...getFieldProps("mileage")}
-              />
-              <FieldError
-                id={getFieldErrorId("mileage")}
-                error={getFieldError("mileage")}
-              />
-            </div>
-            <div>
-              <Label htmlFor="transmission">Transmission</Label>
-              <Input
-                id="transmission"
-                name="transmission"
-                defaultValue={vehicle?.transmission}
-                list="vehicle-transmission-options"
-                placeholder="Automatic"
-                {...getFieldProps("transmission")}
-              />
-              <FieldError
-                id={getFieldErrorId("transmission")}
-                error={getFieldError("transmission")}
-              />
-            </div>
-            <div>
-              <Label htmlFor="fuelType">Fuel type</Label>
-              <Input
-                id="fuelType"
-                name="fuelType"
-                defaultValue={vehicle?.fuelType}
-                list="vehicle-fuel-options"
-                placeholder="Petrol"
-                {...getFieldProps("fuelType")}
-              />
-              <FieldError
-                id={getFieldErrorId("fuelType")}
-                error={getFieldError("fuelType")}
-              />
-            </div>
-            <div>
-              <Label htmlFor="driveType">Drive type</Label>
-              <Input
-                id="driveType"
-                name="driveType"
-                defaultValue={vehicle?.driveType || ""}
-                list="vehicle-drive-options"
-                placeholder="4WD"
-              />
-            </div>
-            <div>
-              <Label htmlFor="bodyType">Body type</Label>
-              <Input
-                id="bodyType"
-                name="bodyType"
-                defaultValue={vehicle?.bodyType || ""}
-                list="vehicle-body-options"
-                placeholder="SUV"
-              />
-            </div>
-            <div>
-              <Label htmlFor="engineCapacity">Engine capacity</Label>
-              <Input
-                id="engineCapacity"
-                name="engineCapacity"
-                defaultValue={vehicle?.engineCapacity || ""}
-                placeholder="4700cc"
-              />
-            </div>
-            <div>
-              <Label htmlFor="color">Color</Label>
-              <Input
-                id="color"
-                name="color"
-                defaultValue={vehicle?.color || ""}
-                placeholder="White"
-              />
-            </div>
-          </div>
-        </FormSection>
-
-        <FormSection
-          id="description"
-          title="Description"
-          description="Keep the copy short and sales-led so the website reads cleanly."
-          className="order-5 lg:order-4"
-        >
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            name="description"
-            defaultValue={vehicle?.description}
-            className={cn("min-h-32", getFieldProps("description").className)}
-            placeholder="Highlight condition, standout features, viewing location, and the strongest reason to enquire."
-            aria-invalid={getFieldProps("description")["aria-invalid"]}
-            aria-describedby={getFieldProps("description")["aria-describedby"]}
-          />
-          <FieldError
-            id={getFieldErrorId("description")}
-            error={getFieldError("description")}
-          />
-        </FormSection>
-
-        <FormSection
-          id="gallery"
-          title="Gallery"
-          description="Stage files or URLs here. Files upload directly to Cloudinary when you save the vehicle."
-          className="order-3 lg:order-5"
-        >
-          <input
-            ref={filePickerRef}
-            type="file"
-            multiple
-            accept={SUPPORTED_IMAGE_MIME_TYPES.join(",")}
-            className="hidden"
-            onChange={(event) => uploadFiles(event.target.files)}
-          />
-
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
-            <div className="flex-1">
-              <Label htmlFor="manual-image">Stage image from URL</Label>
-              <Input
-                id="manual-image"
-                value={manualImageUrl}
-                onChange={(event) => setManualImageUrl(event.target.value)}
-                placeholder="https://..."
-                aria-describedby={
-                  uploadError || getFieldError("images")
-                    ? "vehicle-gallery-error"
-                    : undefined
-                }
-                aria-invalid={uploadError || getFieldError("images") ? true : undefined}
-              />
+        <div className="fixed inset-x-0 bottom-0 z-40 flex h-20 items-center justify-between border-t border-[#e9ecef] bg-white/80 px-4 shadow-[0_-4px_12px_rgba(3,22,53,0.05)] backdrop-blur-md">
+          <div className="mx-auto grid w-full max-w-[360px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <div className="min-w-0">
+              <p
+                className={cn(
+                  "text-[11px] font-semibold leading-4 tracking-[0.03em]",
+                  hasSaveError || requiredMissing.length
+                    ? "text-[#44474e]"
+                    : "text-green-700",
+                )}
+              >
+                {isSaving || isSubmitting
+                  ? "Saving"
+                  : hasSaveError
+                    ? "Failed"
+                    : requiredMissing.length
+                      ? "Incomplete"
+                      : "Complete"}
+              </p>
+              <p className="mt-0.5 inline-flex items-center gap-1 text-sm font-bold leading-5 text-[#3e2700]">
+                {requiredMissing.length ? (
+                  <AlertCircle className="size-4 fill-[#3e2700]" />
+                ) : (
+                  <CheckCircle2 className="size-4 fill-green-600 text-green-600" />
+                )}
+                {requiredMissing.length
+                  ? `${requiredMissing.length} missing`
+                  : "Ready"}
+              </p>
             </div>
             <Button
-              type="button"
-              variant="secondary"
-              onClick={addManualImage}
+              type="submit"
+              form={formId}
+              className="h-12 rounded-xl border-[#1a2b4b] bg-[#1a2b4b] px-8 text-lg font-semibold leading-6 text-white shadow-lg hover:border-[#031635] hover:bg-[#031635]"
+              disabled={saveDisabled}
             >
-              <ImagePlus className="size-4" />
-              Stage URL
-            </Button>
-            <Button type="button" variant="dark" onClick={openFilePicker}>
-              <ImagePlus className="size-4" />
-              Stage Files
+              {isSaving || isSubmitting ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : null}
+              {isEditing ? "Save changes" : "Save vehicle"}
             </Button>
           </div>
-
-          <FieldError
-            id="vehicle-gallery-error"
-            error={uploadError || getFieldError("images")}
-            className="text-sm text-red-600"
-          />
-
-          {normalizedImages.length ? (
-            <div className="grid gap-3">
-              {normalizedImages.map((image, index) => {
-                const isPending =
-                  image.uploadState === "pending_file" ||
-                  image.uploadState === "pending_url";
-
-                return (
-                  <div
-                    key={`${image.imageUrl}-${index}`}
-                    className="grid gap-3 rounded-[24px] border border-border bg-white p-3 md:grid-cols-[112px_minmax(0,1fr)_auto] md:items-center"
-                  >
-                    <div className="relative h-20 overflow-hidden rounded-2xl bg-stone-100">
-                      <Image
-                        src={image.imageUrl}
-                        alt={image.altText || "Vehicle image"}
-                        fill
-                        sizes="(max-width: 767px) 100vw, 112px"
-                        className="object-cover"
-                      />
-                    </div>
-
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate text-sm font-semibold text-stone-900">
-                          {getImageLabel(image.imageUrl, index)}
-                        </p>
-                        {image.isHero ? <Badge variant="accent">Hero</Badge> : null}
-                        <Badge variant={isPending ? "muted" : "success"}>
-                          {image.uploadState === "pending_url"
-                            ? "Imports on save"
-                            : isPending
-                              ? "Uploads on save"
-                              : "Saved"}
-                        </Badge>
-                      </div>
-                      <p className="mt-1 truncate text-xs text-stone-500">
-                        {image.imageUrl}
-                      </p>
-                      <Input
-                        aria-label={`Alt text for image ${index + 1}`}
-                        placeholder="Alt text"
-                        value={image.altText || ""}
-                        onChange={(event) =>
-                          setImages((current) =>
-                            normalizeImages(
-                              current.map((item, itemIndex) =>
-                                itemIndex === index
-                                  ? { ...item, altText: event.target.value }
-                                  : item,
-                              ),
-                            ),
-                          )
-                        }
-                        className="mt-3 h-10"
-                      />
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                      {image.isHero ? (
-                        <Badge variant="accent">Hero image</Badge>
-                      ) : (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => setHero(index)}
-                        >
-                          <Star className="size-4" />
-                          Make hero
-                        </Button>
-                      )}
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => moveImageUp(index)}
-                        disabled={index === 0}
-                      >
-                        <ArrowUp className="size-4" />
-                        Move up
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        className="text-red-700 hover:bg-red-50 hover:text-red-800"
-                        onClick={() => removeImage(index)}
-                      >
-                        <Trash2 className="size-4" />
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="rounded-[24px] border border-dashed border-border bg-stone-50 px-5 py-7 text-sm leading-7 text-stone-600">
-              No gallery images yet. You can save the vehicle first, then pull
-              the Cloudinary folder later, or stage images now and upload them
-              with the save action.
-            </div>
-          )}
-        </FormSection>
-
-        <div className="flex flex-col gap-3 border-t border-border/70 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-stone-600">
-            Gallery order, hero selection, and listing details are all committed with
-            the save action.
-          </p>
-          {lastSavedAt ? (
-            <p className="text-sm font-medium text-emerald-700">
-              Last saved in this session.
-            </p>
-          ) : null}
         </div>
 
         <datalist id="vehicle-condition-options">

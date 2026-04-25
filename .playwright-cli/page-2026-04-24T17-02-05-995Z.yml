@@ -1,0 +1,192 @@
+- generic [ref=e1]:
+  - generic [ref=e27]:
+    - complementary [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - img [ref=e33]
+            - generic [ref=e36]:
+              - paragraph [ref=e37]: Operations
+              - heading "Ocean Motors" [level=1] [ref=e38]
+          - generic [ref=e39]:
+            - paragraph [ref=e40]: Signed in
+            - paragraph [ref=e41]: Production Admin
+            - paragraph [ref=e42]: asabatheif@gmail.com | supabase
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - paragraph [ref=e45]: Workspace
+            - link "Add" [ref=e46] [cursor=pointer]:
+              - /url: /admin/vehicles/new
+              - img [ref=e47]
+              - text: Add
+          - navigation "Admin navigation" [ref=e48]:
+            - link "Inventory Manage listings and publishing state." [ref=e420] [cursor=pointer]:
+              - /url: /admin/vehicles
+              - paragraph [ref=e51]: Inventory
+              - paragraph [ref=e53]: Manage listings and publishing state.
+            - link "Create vehicle Live Add a new stock item." [active] [ref=e421] [cursor=pointer]:
+              - /url: /admin/vehicles/new
+              - generic [ref=e55]:
+                - paragraph [ref=e56]: Create vehicle
+                - generic [ref=e422]: Live
+              - paragraph [ref=e57]: Add a new stock item.
+            - link "Lead inbox Respond to new enquiries quickly." [ref=e58] [cursor=pointer]:
+              - /url: /admin/leads
+              - paragraph [ref=e60]: Lead inbox
+              - paragraph [ref=e61]: Respond to new enquiries quickly.
+        - button "Sign out" [ref=e63]:
+          - text: Sign out
+          - img [ref=e64]
+    - main [ref=e68]:
+      - generic [ref=e424]:
+        - generic [ref=e425]:
+          - generic [ref=e427]:
+            - button "Return to inventory" [ref=e428]:
+              - img [ref=e429]
+              - text: Return to inventory
+            - generic [ref=e431]:
+              - heading "Create vehicle" [level=2] [ref=e432]
+              - generic [ref=e434]: Ready to create
+          - group [ref=e435]:
+            - generic "Quick Fill from dealer message Optional" [ref=e436] [cursor=pointer]:
+              - generic [ref=e437]:
+                - img [ref=e438]
+                - text: Quick Fill from dealer message
+              - generic [ref=e441]: Optional
+        - navigation "Vehicle editor sections" [ref=e442]:
+          - link "Quick fill" [ref=e443] [cursor=pointer]:
+            - /url: "#quick-fill"
+          - link "Basic" [ref=e444] [cursor=pointer]:
+            - /url: "#basics"
+          - link "Price" [ref=e445] [cursor=pointer]:
+            - /url: "#price"
+          - link "Specs" [ref=e446] [cursor=pointer]:
+            - /url: "#specs"
+          - link "Images" [ref=e447] [cursor=pointer]:
+            - /url: "#gallery"
+          - link "Description" [ref=e448] [cursor=pointer]:
+            - /url: "#description"
+          - link "Status" [ref=e449] [cursor=pointer]:
+            - /url: "#status"
+        - generic [ref=e450]:
+          - generic [ref=e451]:
+            - heading "Basic Details" [level=3] [ref=e452]
+            - paragraph [ref=e453]: Start with the identifiers a broker needs when adding a vehicle from a phone.
+          - generic [ref=e454]:
+            - generic [ref=e455]:
+              - generic [ref=e456]: Make
+              - combobox "Make" [ref=e457]
+            - generic [ref=e458]:
+              - generic [ref=e459]: Model
+              - textbox "Model" [ref=e460]:
+                - /placeholder: Land Cruiser V8
+            - generic [ref=e461]:
+              - generic [ref=e462]: Year
+              - spinbutton "Year" [ref=e463]
+            - generic [ref=e464]:
+              - generic [ref=e465]: Location
+              - combobox "Location" [ref=e466]:
+                - option "Select location" [selected]
+                - option "Mombasa Showroom"
+                - option "Miritini Yard"
+            - generic [ref=e467]:
+              - generic [ref=e468]: Listing title
+              - textbox "Listing title" [ref=e469]:
+                - /placeholder: Optional. Auto-fills from year, make, and model if left blank.
+            - generic [ref=e470]: The system keeps the stock code and public vehicle URL in sync automatically when you save this listing.
+        - generic [ref=e471]:
+          - generic [ref=e472]:
+            - heading "Price" [level=3] [ref=e473]
+            - paragraph [ref=e474]: Use full KES amounts. Commas are accepted for faster phone entry.
+          - generic [ref=e475]:
+            - generic [ref=e476]:
+              - generic [ref=e477]: Price
+              - textbox "2790000" [ref=e478]
+              - paragraph [ref=e479]: "Enter the full price in KES (example: 2,790,000)."
+            - generic [ref=e480]:
+              - generic [ref=e481]: Condition
+              - combobox "Condition" [ref=e482]
+            - generic [ref=e483]:
+              - checkbox "Price negotiable" [ref=e484]
+              - text: Price negotiable
+        - generic [ref=e485]:
+          - generic [ref=e486]:
+            - heading "Specs" [level=3] [ref=e487]
+            - paragraph [ref=e488]: Use the common options for speed, but keep the fields open for custom entries when needed.
+          - generic [ref=e489]:
+            - generic [ref=e490]:
+              - generic [ref=e491]: Mileage (km)
+              - textbox "Mileage (km)" [ref=e492]:
+                - /placeholder: "85000"
+            - generic [ref=e493]:
+              - generic [ref=e494]: Transmission
+              - combobox "Transmission" [ref=e495]
+            - generic [ref=e496]:
+              - generic [ref=e497]: Fuel type
+              - combobox "Fuel type" [ref=e498]
+            - generic [ref=e499]:
+              - generic [ref=e500]: Drive type
+              - combobox "Drive type" [ref=e501]
+            - generic [ref=e502]:
+              - generic [ref=e503]: Body type
+              - combobox "Body type" [ref=e504]
+            - generic [ref=e505]:
+              - generic [ref=e506]: Engine capacity
+              - textbox "Engine capacity" [ref=e507]:
+                - /placeholder: 4700cc
+            - generic [ref=e508]:
+              - generic [ref=e509]: Color
+              - textbox "Color" [ref=e510]:
+                - /placeholder: White
+        - generic [ref=e511]:
+          - generic [ref=e512]:
+            - heading "Description" [level=3] [ref=e513]
+            - paragraph [ref=e514]: Keep the copy short and sales-led so the website reads cleanly.
+          - generic [ref=e515]: Description
+          - textbox "Highlight condition, standout features, viewing location, and the strongest reason to enquire." [ref=e516]
+        - generic [ref=e517]:
+          - generic [ref=e518]:
+            - heading "Images" [level=3] [ref=e519]
+            - paragraph [ref=e520]: Stage files or URLs here. Files upload directly to Cloudinary when you save the vehicle.
+          - generic [ref=e521]:
+            - generic [ref=e522]:
+              - generic [ref=e523]: Stage image from URL
+              - textbox "Stage image from URL" [ref=e524]:
+                - /placeholder: https://...
+            - button "Stage URL" [ref=e525]:
+              - img [ref=e526]
+              - text: Stage URL
+            - button "Stage Files" [ref=e530]:
+              - img [ref=e531]
+              - text: Stage Files
+          - generic [ref=e535]: No gallery images yet. You can save the vehicle first, then pull the Cloudinary folder later, or stage images now and upload them with the save action.
+        - generic [ref=e536]:
+          - generic [ref=e537]:
+            - heading "Status" [level=3] [ref=e538]
+            - paragraph [ref=e539]: Choose whether this listing should stay private, go live, or be marked sold.
+          - generic [ref=e540]:
+            - generic [ref=e541]:
+              - generic [ref=e542]: Status
+              - combobox [ref=e543]:
+                - option "Draft" [selected]
+                - option "Published"
+                - option "Sold"
+                - option "Unpublished"
+            - generic [ref=e544]:
+              - generic [ref=e545]: Stock category
+              - combobox "Stock category" [ref=e546]:
+                - option "New"
+                - option "Used" [selected]
+                - option "Imported"
+                - option "Available for importation"
+                - option "Traded-in"
+            - generic [ref=e547]:
+              - checkbox "Featured listing" [ref=e548]
+              - text: Featured listing
+        - generic [ref=e549]: Save commits the current field values, gallery order, and hero image together.
+        - generic [ref=e551]:
+          - generic [ref=e552]:
+            - paragraph [ref=e553]: Start filling to enable save
+            - paragraph [ref=e554]: Fill the essentials, then save and move on.
+          - button "Save vehicle" [disabled]
+  - alert [ref=e26]: Create vehicle | Ocean Motors Admin

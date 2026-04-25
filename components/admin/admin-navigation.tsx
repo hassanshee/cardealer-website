@@ -186,6 +186,7 @@ export function AdminNavigation({
 }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const usesFocusedCreateShell = pathname === "/admin/vehicles/new";
   const pageLabel = useMemo(() => getCurrentPageLabel(pathname), [pathname]);
   const showAdminsLink = canManageAdmins || session.mode === "demo";
   const navItems = useMemo(() => {
@@ -263,7 +264,12 @@ export function AdminNavigation({
         <NavigationPanel pathname={pathname} session={session} navItems={navItems} />
       </aside>
 
-      <div className="sticky top-0 z-30 border-b border-border/70 bg-white/92 backdrop-blur lg:hidden">
+      <div
+        className={cn(
+          "sticky top-0 z-30 border-b border-border/70 bg-white/92 backdrop-blur lg:hidden",
+          usesFocusedCreateShell && "hidden",
+        )}
+      >
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="min-w-0">
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-primary sm:tracking-[0.24em]">

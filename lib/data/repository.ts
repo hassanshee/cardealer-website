@@ -893,17 +893,8 @@ export async function saveVehicle(input: VehicleFormInput, options: WriteOptions
     throw vehicleError;
   }
 
-  const { error: deleteImagesError } = await serverClient
-    .from("vehicle_images")
-    .delete()
-    .eq("vehicle_id", nextVehicle.id);
-
-  if (deleteImagesError) {
-    throw deleteImagesError;
-  }
-
   if (nextVehicle.images.length) {
-    const { error: imagesError } = await serverClient.from("vehicle_images").insert(
+    const { error: imagesError } = await serverClient.from("vehicle_images").upsert(
       nextVehicle.images.map((image) => ({
         id: image.id,
         vehicle_id: nextVehicle.id,
@@ -919,6 +910,22 @@ export async function saveVehicle(input: VehicleFormInput, options: WriteOptions
     if (imagesError) {
       throw imagesError;
     }
+  }
+
+  const deleteImagesQuery = serverClient
+    .from("vehicle_images")
+    .delete()
+    .eq("vehicle_id", nextVehicle.id);
+  const { error: deleteImagesError } = nextVehicle.images.length
+    ? await deleteImagesQuery.not(
+        "id",
+        "in",
+        `(${nextVehicle.images.map((image) => image.id).join(",")})`,
+      )
+    : await deleteImagesQuery;
+
+  if (deleteImagesError) {
+    throw deleteImagesError;
   }
 
   if (removedCloudinaryPublicIds.length) {
