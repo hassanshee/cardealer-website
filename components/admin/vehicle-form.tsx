@@ -559,9 +559,14 @@ export function VehicleForm({
   }
 
   function extractPrice(text: string) {
-    const withSuffix = text.match(/\b(\d+(?:\.\d+)?)\s*([mk])\b/i);
+    const withSuffix = text.match(/\b(\d+(?:\.\d+)?)\s*([mk])\*?\s*neg/i);
     if (withSuffix) {
       return parseMoney(`${withSuffix[1]}${withSuffix[2]}`);
+    }
+
+    const withSuffixSimple = text.match(/\b(\d+(?:\.\d+)?)\s*([mk])\b/i);
+    if (withSuffixSimple) {
+      return parseMoney(`${withSuffixSimple[1]}${withSuffixSimple[2]}`);
     }
 
     const currencyMatch = text.match(
@@ -672,10 +677,13 @@ export function VehicleForm({
     if (/clean unit/i.test(text)) {
       return "Clean unit";
     }
+    if (/super clean/i.test(text)) {
+      return "Very clean";
+    }
     if (/brand new|new\b/i.test(text)) {
       return "Brand new";
     }
-    if (/foreign used/i.test(text)) {
+    if (/foreign used|imported/i.test(text)) {
       return "Foreign used";
     }
     if (/locally used/i.test(text)) {
@@ -690,6 +698,7 @@ export function VehicleForm({
     }
     const depositMatch = text.match(/deposit\s*([0-9][0-9,]*(?:\.\d+)?)([mk])?/i);
     const termMatch = text.match(/\b(\d{1,2})\s*months?\b/i);
+    const balanceMatch = text.match(/balance\s*([0-9][0-9,]*(?:\.\d+)?)([mk])?/i);
     const depositKes = depositMatch?.[0]
       ? parseMoney(`${depositMatch[1]}${depositMatch[2] || ""}`)
       : null;
@@ -703,18 +712,24 @@ export function VehicleForm({
   function extractMakeModel(text: string) {
     const makeMatch = text.match(/\bmake\s*:\s*([a-z0-9\- ]+)/i);
     const modelMatch = text.match(/\bmodel\s*:\s*([a-z0-9\- ]+)/i);
+    const trimMatch = text.match(/\btrim\s*:\s*([a-z0-9\- ]+)/i);
 
     if (makeMatch || modelMatch) {
+      const make = makeMatch?.[1]?.trim();
+      const model = modelMatch?.[1]?.trim();
+      const trim = trimMatch?.[1]?.trim();
       return {
-        make: makeMatch?.[1]?.trim(),
-        model: modelMatch?.[1]?.trim(),
+        make,
+        model: model || trim || undefined,
       };
     }
 
-    const firstLine = text.split("\n").find((line) => line.trim().length > 2);
+    const lines = text.split("\n");
+    const firstLine = lines.find((line) => line.trim().length > 2);
     if (!firstLine) {
       return {};
     }
+
     const cleaned = firstLine.replace(/[^a-z0-9\s-]/gi, " ").trim();
     const tokens = cleaned.split(/\s+/).filter(Boolean);
     if (!tokens.length) {
@@ -1866,271 +1881,263 @@ export function VehicleForm({
           </div>
         ) : null}
 
-        <FormSection
-          id="vehicle-basics"
-          title="Basic Details"
-          description="Start with the identifiers a broker needs when adding a vehicle from a phone."
-          className="order-2"
-        >
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <FieldLabel htmlFor="make" required={requiredFieldNames.has("make")}>
-                Make
-              </FieldLabel>
-              <Input
-                id="make"
-                name="make"
-                value={make}
-                onChange={(event) => setMake(event.target.value)}
-                placeholder="Toyota"
-                list="vehicle-make-options"
-                className={cn(designInputClassName, getFieldProps("make").className)}
-                aria-invalid={getFieldProps("make")["aria-invalid"]}
-                aria-describedby={getFieldProps("make")["aria-describedby"]}
-              />
-              <FieldError
-                id={getFieldErrorId("make")}
-                error={getFieldError("make")}
-              />
-            </div>
-            <div className="space-y-1">
-              <FieldLabel htmlFor="model" required={requiredFieldNames.has("model")}>
-                Model
-              </FieldLabel>
-              <Input
-                id="model"
-                name="model"
-                value={model}
-                onChange={(event) => setModel(event.target.value)}
-                placeholder="Land Cruiser V8"
-                className={cn(designInputClassName, getFieldProps("model").className)}
-                aria-invalid={getFieldProps("model")["aria-invalid"]}
-                aria-describedby={getFieldProps("model")["aria-describedby"]}
-              />
-              <FieldError
-                id={getFieldErrorId("model")}
-                error={getFieldError("model")}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+          <FormSection
+            id="vehicle-basics"
+            title="Basic Details"
+            description="Start with the identifiers a broker needs when adding a vehicle from a phone."
+            className="order-2"
+          >
+            <div className="space-y-4">
               <div className="space-y-1">
-                <FieldLabel htmlFor="year" required={requiredFieldNames.has("year")}>
-                  Year
+                <FieldLabel htmlFor="make" required={requiredFieldNames.has("make")}>
+                  Make
                 </FieldLabel>
                 <Input
-                  id="year"
-                  name="year"
-                  type="number"
-                  value={year}
-                  onChange={(event) => setYear(event.target.value)}
-                  placeholder="2018"
-                  min={1990}
-                  max={new Date().getFullYear() + 1}
-                  className={cn(designInputClassName, getFieldProps("year").className)}
-                  aria-invalid={getFieldProps("year")["aria-invalid"]}
-                  aria-describedby={getFieldProps("year")["aria-describedby"]}
+                  id="make"
+                  name="make"
+                  value={make}
+                  onChange={(event) => setMake(event.target.value)}
+                  placeholder="Toyota"
+                  list="vehicle-make-options"
+                  className={cn(designInputClassName, getFieldProps("make").className)}
+                  aria-invalid={getFieldProps("make")["aria-invalid"]}
+                  aria-describedby={getFieldProps("make")["aria-describedby"]}
                 />
                 <FieldError
-                  id={getFieldErrorId("year")}
-                  error={getFieldError("year")}
+                  id={getFieldErrorId("make")}
+                  error={getFieldError("make")}
                 />
               </div>
               <div className="space-y-1">
-                <Label
-                  htmlFor="locationId"
-                  className="text-sm font-medium leading-5 text-[#44474e]"
-                >
-                  Location
-                </Label>
-                <select
-                  id="locationId"
-                  name="locationId"
-                  defaultValue={vehicle?.locationId || ""}
-                  className={cn(selectClassName, getFieldProps("locationId").className)}
-                  aria-invalid={getFieldProps("locationId")["aria-invalid"]}
-                  aria-describedby={getFieldProps("locationId")["aria-describedby"]}
-                >
-                  <option value="">Select</option>
-                  {locations.map((location) => (
-                    <option key={location.id} value={location.id}>
-                      {location.city || location.name}
-                    </option>
-                  ))}
-                </select>
-                <FieldError
-                  id={getFieldErrorId("locationId")}
-                  error={getFieldError("locationId")}
-                />
-              </div>
-            </div>
-            <input type="hidden" name="title" value={title} />
-          </div>
-        </FormSection>
-
-        <FormSection
-          id="vehicle-price"
-          title="Price"
-          description="Use full KES amounts. Commas are accepted for faster phone entry."
-          className="order-3"
-        >
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <FieldLabel htmlFor="price" required={requiredFieldNames.has("price")}>
-                Price (Ksh)
-              </FieldLabel>
-              <Input
-                id="price"
-                name="price"
-                type="text"
-                inputMode="numeric"
-                defaultValue={vehicle?.price}
-                placeholder="2,790,000"
-                className={cn(
-                  designInputClassName,
-                  "font-semibold",
-                  getFieldProps("price").className,
-                )}
-                aria-invalid={getFieldProps("price")["aria-invalid"]}
-                aria-describedby={getFieldProps("price")["aria-describedby"]}
-              />
-              <FieldError
-                id={getFieldErrorId("price")}
-                error={getFieldError("price")}
-              />
-            </div>
-            <div className="space-y-1">
-              <FieldLabel
-                htmlFor="condition"
-                required={requiredFieldNames.has("condition")}
-              >
-                Condition
-              </FieldLabel>
-              <select
-                id="condition"
-                name="condition"
-                defaultValue={vehicle?.condition}
-                className={cn(selectClassName, getFieldProps("condition").className)}
-                aria-invalid={getFieldProps("condition")["aria-invalid"]}
-                aria-describedby={getFieldProps("condition")["aria-describedby"]}
-              >
-                <option value="">Select condition</option>
-                {conditionOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              <FieldError
-                id={getFieldErrorId("condition")}
-                error={getFieldError("condition")}
-              />
-            </div>
-            <label className="flex min-h-6 cursor-pointer items-center gap-2 text-sm leading-5 text-[#141d23]">
-              <input
-                type="checkbox"
-                name="negotiable"
-                defaultChecked={vehicle?.negotiable}
-                className="size-5 rounded border-[#c5c6cf] text-[#1a2b4b] focus:ring-[#1a2b4b]"
-              />
-              Price negotiable
-            </label>
-          </div>
-        </FormSection>
-
-        <FormSection
-          id="vehicle-specs"
-          title="Specs"
-          description="Use the common options for speed, but keep the fields open for custom entries when needed."
-          className="order-4"
-        >
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <FieldLabel
-                htmlFor="mileage"
-                required={requiredFieldNames.has("mileage")}
-              >
-                Mileage (km)
-              </FieldLabel>
-              <Input
-                id="mileage"
-                name="mileage"
-                type="text"
-                inputMode="numeric"
-                defaultValue={vehicle?.mileage}
-                placeholder="85000"
-                className={cn(
-                  designInputClassName,
-                  getFieldProps("mileage").className,
-                )}
-                aria-invalid={getFieldProps("mileage")["aria-invalid"]}
-                aria-describedby={getFieldProps("mileage")["aria-describedby"]}
-              />
-              <FieldError
-                id={getFieldErrorId("mileage")}
-                error={getFieldError("mileage")}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <FieldLabel
-                  htmlFor="transmission"
-                  required={requiredFieldNames.has("transmission")}
-                >
-                  Transmission
+                <FieldLabel htmlFor="model" required={requiredFieldNames.has("model")}>
+                  Model
                 </FieldLabel>
-                <select
-                  id="transmission"
-                  name="transmission"
-                  defaultValue={vehicle?.transmission || ""}
+                <Input
+                  id="model"
+                  name="model"
+                  value={model}
+                  onChange={(event) => setModel(event.target.value)}
+                  placeholder="Land Cruiser V8"
+                  className={cn(designInputClassName, getFieldProps("model").className)}
+                  aria-invalid={getFieldProps("model")["aria-invalid"]}
+                  aria-describedby={getFieldProps("model")["aria-describedby"]}
+                />
+                <FieldError
+                  id={getFieldErrorId("model")}
+                  error={getFieldError("model")}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <FieldLabel htmlFor="year" required={requiredFieldNames.has("year")}>
+                    Year
+                  </FieldLabel>
+                  <Input
+                    id="year"
+                    name="year"
+                    type="number"
+                    value={year}
+                    onChange={(event) => setYear(event.target.value)}
+                    placeholder="2018"
+                    min={1990}
+                    max={new Date().getFullYear() + 1}
+                    className={cn(designInputClassName, getFieldProps("year").className)}
+                    aria-invalid={getFieldProps("year")["aria-invalid"]}
+                    aria-describedby={getFieldProps("year")["aria-describedby"]}
+                  />
+                  <FieldError
+                    id={getFieldErrorId("year")}
+                    error={getFieldError("year")}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="locationId"
+                    className="text-sm font-medium leading-5 text-[#44474e]"
+                  >
+                    Location
+                  </Label>
+                  <select
+                    id="locationId"
+                    name="locationId"
+                    defaultValue={vehicle?.locationId || ""}
+                    className={cn(selectClassName, getFieldProps("locationId").className)}
+                    aria-invalid={getFieldProps("locationId")["aria-invalid"]}
+                    aria-describedby={getFieldProps("locationId")["aria-describedby"]}
+                  >
+                    <option value="">Select</option>
+                    {locations.map((location) => (
+                      <option key={location.id} value={location.id}>
+                        {location.city || location.name}
+                      </option>
+                    ))}
+                  </select>
+                  <FieldError
+                    id={getFieldErrorId("locationId")}
+                    error={getFieldError("locationId")}
+                  />
+                </div>
+              </div>
+              <input type="hidden" name="title" value={title} />
+            </div>
+          </FormSection>
+
+          <FormSection
+            id="vehicle-price-specs"
+            title="Price & Specs"
+            description="Set pricing and technical specifications."
+            className="order-3"
+          >
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <FieldLabel htmlFor="price" required={requiredFieldNames.has("price")}>
+                  Price (Ksh)
+                </FieldLabel>
+                <Input
+                  id="price"
+                  name="price"
+                  type="text"
+                  inputMode="numeric"
+                  defaultValue={vehicle?.price}
+                  placeholder="2,790,000"
                   className={cn(
-                    selectClassName,
-                    getFieldProps("transmission").className,
+                    designInputClassName,
+                    "font-semibold",
+                    getFieldProps("price").className,
                   )}
-                  aria-invalid={getFieldProps("transmission")["aria-invalid"]}
-                  aria-describedby={getFieldProps("transmission")["aria-describedby"]}
-                >
-                  <option value="">Select</option>
-                  {transmissionOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
+                  aria-invalid={getFieldProps("price")["aria-invalid"]}
+                  aria-describedby={getFieldProps("price")["aria-describedby"]}
+                />
                 <FieldError
-                  id={getFieldErrorId("transmission")}
-                  error={getFieldError("transmission")}
+                  id={getFieldErrorId("price")}
+                  error={getFieldError("price")}
                 />
               </div>
               <div className="space-y-1">
                 <FieldLabel
-                  htmlFor="fuelType"
-                  required={requiredFieldNames.has("fuelType")}
+                  htmlFor="condition"
+                  required={requiredFieldNames.has("condition")}
                 >
-                  Fuel type
+                  Condition
                 </FieldLabel>
                 <select
-                  id="fuelType"
-                  name="fuelType"
-                  defaultValue={vehicle?.fuelType || ""}
-                  className={cn(selectClassName, getFieldProps("fuelType").className)}
-                  aria-invalid={getFieldProps("fuelType")["aria-invalid"]}
-                  aria-describedby={getFieldProps("fuelType")["aria-describedby"]}
+                  id="condition"
+                  name="condition"
+                  defaultValue={vehicle?.condition}
+                  className={cn(selectClassName, getFieldProps("condition").className)}
+                  aria-invalid={getFieldProps("condition")["aria-invalid"]}
+                  aria-describedby={getFieldProps("condition")["aria-describedby"]}
                 >
-                  <option value="">Select</option>
-                  {fuelTypeOptions.map((option) => (
+                  <option value="">Select condition</option>
+                  {conditionOptions.map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>
                   ))}
                 </select>
                 <FieldError
-                  id={getFieldErrorId("fuelType")}
-                  error={getFieldError("fuelType")}
+                  id={getFieldErrorId("condition")}
+                  error={getFieldError("condition")}
                 />
               </div>
+              <div className="space-y-1">
+                <FieldLabel
+                  htmlFor="mileage"
+                  required={requiredFieldNames.has("mileage")}
+                >
+                  Mileage (km)
+                </FieldLabel>
+                <Input
+                  id="mileage"
+                  name="mileage"
+                  type="text"
+                  inputMode="numeric"
+                  defaultValue={vehicle?.mileage}
+                  placeholder="85000"
+                  className={cn(
+                    designInputClassName,
+                    getFieldProps("mileage").className,
+                  )}
+                  aria-invalid={getFieldProps("mileage")["aria-invalid"]}
+                  aria-describedby={getFieldProps("mileage")["aria-describedby"]}
+                />
+                <FieldError
+                  id={getFieldErrorId("mileage")}
+                  error={getFieldError("mileage")}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <FieldLabel
+                    htmlFor="transmission"
+                    required={requiredFieldNames.has("transmission")}
+                  >
+                    Transmission
+                  </FieldLabel>
+                  <select
+                    id="transmission"
+                    name="transmission"
+                    defaultValue={vehicle?.transmission || ""}
+                    className={cn(
+                      selectClassName,
+                      getFieldProps("transmission").className,
+                    )}
+                    aria-invalid={getFieldProps("transmission")["aria-invalid"]}
+                    aria-describedby={getFieldProps("transmission")["aria-describedby"]}
+                  >
+                    <option value="">Select</option>
+                    {transmissionOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <FieldError
+                    id={getFieldErrorId("transmission")}
+                    error={getFieldError("transmission")}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <FieldLabel
+                    htmlFor="fuelType"
+                    required={requiredFieldNames.has("fuelType")}
+                  >
+                    Fuel type
+                  </FieldLabel>
+                  <select
+                    id="fuelType"
+                    name="fuelType"
+                    defaultValue={vehicle?.fuelType || ""}
+                    className={cn(selectClassName, getFieldProps("fuelType").className)}
+                    aria-invalid={getFieldProps("fuelType")["aria-invalid"]}
+                    aria-describedby={getFieldProps("fuelType")["aria-describedby"]}
+                  >
+                    <option value="">Select</option>
+                    {fuelTypeOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <FieldError
+                    id={getFieldErrorId("fuelType")}
+                    error={getFieldError("fuelType")}
+                  />
+                </div>
+              </div>
+              <label className="flex min-h-6 cursor-pointer items-center gap-2 text-sm leading-5 text-[#141d23]">
+                <input
+                  type="checkbox"
+                  name="negotiable"
+                  defaultChecked={vehicle?.negotiable}
+                  className="size-5 rounded border-[#c5c6cf] text-[#1a2b4b] focus:ring-[#1a2b4b]"
+                />
+                Price negotiable
+              </label>
             </div>
-          </div>
-        </FormSection>
+          </FormSection>
+        </div>
 
         <div className="hidden">
           <input name="driveType" defaultValue={vehicle?.driveType || ""} />
@@ -2144,7 +2151,7 @@ export function VehicleForm({
           title="Images"
           description="Add listing photos from the phone gallery or from a URL."
           summary={imageSectionSummary}
-          className="order-5"
+          className="order-4"
         >
           <input
             ref={filePickerRef}
@@ -2156,8 +2163,7 @@ export function VehicleForm({
           />
 
           <div
-            className="flex aspect-video cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-[#c5c6cf] bg-[#e6eff8] transition-colors hover:bg-[#e0e9f2]"
-            onClick={openFilePicker}
+            className="flex aspect-video flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-[#c5c6cf] bg-[#e6eff8] transition-colors hover:bg-[#e0e9f2]"
           >
             <button
               type="button"
@@ -2390,7 +2396,7 @@ export function VehicleForm({
           id="vehicle-description"
           title="Description *"
           description="Keep the copy short and sales-led so the website reads cleanly."
-          className="order-6"
+          className="order-5"
         >
           <Label htmlFor="description" className="sr-only">
             Description
@@ -2417,7 +2423,7 @@ export function VehicleForm({
           id="vehicle-status"
           title="Listing Status"
           description="Choose whether this listing should stay private, go live, or be marked sold."
-          className="order-7"
+          className="order-6"
         >
           <div className="space-y-4">
             <div className="space-y-1">
