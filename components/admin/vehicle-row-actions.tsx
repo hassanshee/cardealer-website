@@ -202,7 +202,7 @@ export function VehicleRowActions({
                     Confirm delete
                   </p>
                   <p className="mt-1 text-xs leading-5 text-red-800">
-                    This removes the listing from the admin inventory.
+                    This permanently deletes the vehicle listing and removes all associated images from Cloudinary. This action cannot be undone.
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <form action={deleteAction}>

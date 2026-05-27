@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -10,6 +10,7 @@ import {
   removeAdminAccountAction,
 } from "@/lib/actions/admin-actions";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +54,7 @@ export function AdminManagement({
     removeAdminAccountAction,
     initialState,
   );
+  const [pendingRemove, setPendingRemove] = useState<string | null>(null);
 
   useEffect(() => {
     if (
@@ -181,27 +183,39 @@ export function AdminManagement({
                       </SubmitButton>
                     </form>
                   )}
-                  <form action={removeAction}>
-                    <input type="hidden" name="userId" value={admin.userId} />
-                    <input type="hidden" name="email" value={admin.email} />
-                    <SubmitButton
+                  {pendingRemove === admin.userId ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={cannotManage}
+                        onClick={() => setPendingRemove(null)}
+                      >
+                        Cancel
+                      </Button>
+                      <form action={removeAction}>
+                        <input type="hidden" name="userId" value={admin.userId} />
+                        <input type="hidden" name="email" value={admin.email} />
+                        <SubmitButton
+                          size="sm"
+                          className="bg-red-600 hover:bg-red-700"
+                          disabled={cannotManage}
+                        >
+                          Confirm
+                        </SubmitButton>
+                      </form>
+                    </div>
+                  ) : (
+                    <Button
                       size="sm"
                       variant="ghost"
                       className="text-red-700 hover:bg-red-50 hover:text-red-800"
                       disabled={cannotManage}
-                      onClick={(event) => {
-                        if (
-                          !confirm(
-                            "Remove this admin? This deletes their account and cannot be undone.",
-                          )
-                        ) {
-                          event.preventDefault();
-                        }
-                      }}
+                      onClick={() => setPendingRemove(admin.userId)}
                     >
                       Remove
-                    </SubmitButton>
-                  </form>
+                    </Button>
+                  )}
                 </div>
               </div>
             );

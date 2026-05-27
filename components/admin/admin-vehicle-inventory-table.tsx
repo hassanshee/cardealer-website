@@ -106,7 +106,7 @@ export function AdminVehicleInventoryTable({
 }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [pendingConfirmation, setPendingConfirmation] = useState<
-    Extract<BulkInventoryAction, "sold" | "delete"> | null
+    BulkInventoryAction | null
   >(null);
   const [bulkState, runBulkAction] = useActionState(
     bulkVehicleAction,
@@ -120,13 +120,27 @@ export function AdminVehicleInventoryTable({
   const confirmationTitle =
     pendingConfirmation === "delete"
       ? "Confirm bulk delete"
-      : "Confirm mark sold";
+      : pendingConfirmation === "sold"
+        ? "Confirm mark sold"
+        : pendingConfirmation === "publish"
+          ? "Confirm bulk publish"
+          : "Confirm bulk unpublish";
   const confirmationDescription =
     pendingConfirmation === "delete"
       ? `Delete ${selectedCount} selected vehicle${selectedCount === 1 ? "" : "s"} from inventory?`
-      : `Mark ${selectedCount} selected vehicle${selectedCount === 1 ? "" : "s"} as sold?`;
+      : pendingConfirmation === "sold"
+        ? `Mark ${selectedCount} selected vehicle${selectedCount === 1 ? "" : "s"} as sold?`
+        : pendingConfirmation === "publish"
+          ? `Publish ${selectedCount} selected vehicle${selectedCount === 1 ? "" : "s"}?`
+          : `Unpublish ${selectedCount} selected vehicle${selectedCount === 1 ? "" : "s"}?`;
   const confirmationButtonLabel =
-    pendingConfirmation === "delete" ? "Confirm delete" : "Confirm mark sold";
+    pendingConfirmation === "delete"
+      ? "Confirm delete"
+      : pendingConfirmation === "sold"
+        ? "Confirm mark sold"
+        : pendingConfirmation === "publish"
+          ? "Confirm publish"
+          : "Confirm unpublish";
 
   function toggleRow(id: string, checked: boolean) {
     setPendingConfirmation(null);
@@ -160,18 +174,13 @@ export function AdminVehicleInventoryTable({
       return;
     }
 
-    if (action === "delete" || action === "sold") {
-      setPendingConfirmation(action);
-      return;
-    }
-
-    submitBulk(action);
+    setPendingConfirmation(action);
   }
 
   return (
     <div className="space-y-2.5" data-view-key={viewKey}>
       {selectedCount > 0 ? (
-        <div className="hidden rounded-xl border border-border bg-stone-50 px-3 py-2 text-sm lg:block">
+        <div className="rounded-xl border border-border bg-stone-50 px-3 py-2 text-sm">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="font-medium text-stone-800">{selectedCount} selected</p>
             <div className="flex flex-wrap items-center gap-2">
@@ -222,6 +231,7 @@ export function AdminVehicleInventoryTable({
                 <Button
                   size="sm"
                   disabled={isPending}
+                  variant={pendingConfirmation === "delete" ? undefined : "default"}
                   className={
                     pendingConfirmation === "delete"
                       ? "bg-red-600 hover:bg-red-700"

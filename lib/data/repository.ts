@@ -1183,10 +1183,7 @@ export async function deleteVehicle(id: string, options: WriteOptions = {}) {
       const publicIds = await collectVehicleCloudinaryPublicIds(existing);
       await deleteCloudinaryAssets(publicIds);
     } catch (error) {
-      console.warn(
-        `[cloudinary] Unable to remove vehicle assets for ${existing.stockCode}.`,
-        error instanceof Error ? error.message : error,
-      );
+      throw new Error(`Cloudinary deletion failed: ${error instanceof Error ? error.message : String(error)}. The vehicle was deleted from the database but images may remain in Cloudinary.`);
     }
   }
 }
