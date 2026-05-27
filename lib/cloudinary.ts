@@ -35,13 +35,16 @@ export type CloudinaryVehicleAsset = {
   filename: string;
 };
 
-export function buildVehicleImageUploadSignature(options: { stockCode?: string } = {}) {
+export function buildVehicleImageUploadSignature(
+  options: { assetFolder?: string; stockCode?: string } = {},
+) {
   if (!hasCloudinaryConfig) {
     throw new Error("Cloudinary is not configured.");
   }
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const assetFolder = getVehicleAssetFolder(options.stockCode);
+  const assetFolder =
+    options.assetFolder || getVehicleAssetFolder(options.stockCode);
   const signedParams = {
     allowed_formats: SUPPORTED_IMAGE_FORMATS.join(","),
     asset_folder: assetFolder,

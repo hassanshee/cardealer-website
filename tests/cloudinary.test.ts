@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  VEHICLE_IMAGE_UPLOAD_MAX_FILES,
   VEHICLE_IMAGE_UPLOAD_MAX_BYTES,
   validateVehicleImageUpload,
 } from "@/lib/vehicle-image-upload";
 
 describe("validateVehicleImageUpload", () => {
+  it("allows up to 30 vehicle images", () => {
+    expect(VEHICLE_IMAGE_UPLOAD_MAX_FILES).toBe(30);
+  });
+
   it("accepts supported image formats", () => {
     expect(() =>
       validateVehicleImageUpload({

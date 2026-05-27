@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { mapVehicleFormData } from "@/lib/vehicle-form";
+import {
+  deriveStockCategoryFromCondition,
+  mapVehicleFormData,
+} from "@/lib/vehicle-form";
 
 function buildVehicleFormData() {
   const formData = new FormData();
@@ -114,6 +117,27 @@ describe("mapVehicleFormData", () => {
     expect(result.slug).toBe("2020-toyota-prado-signature");
   });
 
+  it("derives stock category from condition when the form omits the redundant field", () => {
+    const formData = buildVehicleFormData();
+    formData.delete("stockCategory");
+
+    expect(mapVehicleFormData(formData).stockCategory).toBe("imported");
+
+    formData.set("condition", "Trade-in unit");
+    expect(mapVehicleFormData(formData).stockCategory).toBe("traded_in");
+
+    formData.set("condition", "Brand new");
+    expect(mapVehicleFormData(formData).stockCategory).toBe("new");
+  });
+
+  it("keeps stock category condition inference explicit", () => {
+    expect(deriveStockCategoryFromCondition("Foreign used")).toBe("imported");
+    expect(deriveStockCategoryFromCondition("Traded-in / Clean unit")).toBe(
+      "traded_in",
+    );
+    expect(deriveStockCategoryFromCondition("Very clean")).toBe("used");
+  });
+
   it("accepts comma-formatted Kenyan price and mileage values", () => {
     const formData = buildVehicleFormData();
     formData.set("price", "2,790,000");
@@ -191,6 +215,44 @@ describe("mapVehicleFormData", () => {
 
     expect(result.status).toBe("draft");
     expect(result.images).toEqual([]);
+  });
+
+  it("accepts 30 images and rejects the 31st at the server boundary", () => {
+    const buildImage = (index: number) => ({
+      imageUrl: `https://example.com/car-${index}.jpg`,
+      sortOrder: index,
+      isHero: index === 0,
+      uploadState: "uploaded",
+    });
+    const formData = buildVehicleFormData();
+
+    formData.set(
+      "imagesJson",
+      JSON.stringify(Array.from({ length: 30 }, (_, index) => buildImage(index))),
+    );
+    expect(mapVehicleFormData(formData).images).toHaveLength(30);
+
+    formData.set(
+      "imagesJson",
+      JSON.stringify(Array.from({ length: 31 }, (_, index) => buildImage(index))),
+    );
+
+    let thrownError: {
+      flatten: () => { fieldErrors: Record<string, string[] | undefined> };
+    } | null = null;
+
+    try {
+      mapVehicleFormData(formData);
+    } catch (error) {
+      thrownError = error as {
+        flatten: () => { fieldErrors: Record<string, string[] | undefined> };
+      };
+    }
+
+    expect(thrownError).not.toBeNull();
+    expect(thrownError!.flatten().fieldErrors.images).toEqual([
+      "Each vehicle can include up to 30 images.",
+    ]);
   });
 
   it("rejects unsupported select values from stale or tampered forms", () => {

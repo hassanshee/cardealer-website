@@ -21,8 +21,10 @@ import {
 } from "@/lib/actions/admin-actions";
 import {
   SUPPORTED_IMAGE_MIME_TYPES,
+  VEHICLE_IMAGE_UPLOAD_MAX_BYTES,
   VEHICLE_IMAGE_UPLOAD_MAX_FILES,
   validateVehicleImageUpload,
+  validateVehicleImageUploadFormat,
 } from "@/lib/vehicle-image-upload";
 import { buildVehicleDraftIdentifiers } from "@/lib/vehicle-form";
 import { Badge } from "@/components/ui/badge";
@@ -51,9 +53,18 @@ type EditableImage = {
   cloudinaryPublicId?: string | null;
   sortOrder: number;
   isHero: boolean;
-  uploadState?: "uploaded" | "pending_file" | "pending_url";
+  uploadState?:
+    | "uploaded"
+    | "pending_url"
+    | "queued"
+    | "compressing"
+    | "uploading"
+    | "failed";
   sourceUrl?: string | null;
   pendingFileId?: string | null;
+  isPersisted?: boolean;
+  uploadError?: string | null;
+  uploadProgress?: number | null;
 };
 
 type PendingFile = {
@@ -79,6 +90,10 @@ type PreparedUploadPayload = {
 };
 
 const initialState: ActionState = { success: false, message: "" };
+const IMAGE_UPLOAD_CONCURRENCY = 3;
+const IMAGE_COMPRESSION_MAX_EDGE = 1920;
+const IMAGE_COMPRESSION_QUALITY = 0.82;
+const IMAGE_COMPRESSION_MIN_BYTES = 2 * 1024 * 1024;
 const designInputClassName =
   "h-10 w-full rounded-lg border border-[#c5c6cf] bg-white px-2.5 text-sm text-[#141d23] shadow-none outline-none focus-visible:border-[#1a2b4b] focus-visible:ring-0";
 const selectClassName =
@@ -165,6 +180,7 @@ function makeEditableImages(vehicle?: Vehicle | null): EditableImage[] {
     cloudinaryPublicId: image.cloudinaryPublicId,
     sortOrder: image.sortOrder,
     isHero: image.isHero,
+    isPersisted: true,
     uploadState: "uploaded",
     sourceUrl: null,
     pendingFileId: null,
@@ -180,6 +196,7 @@ function makeEditableImagesFromSaved(
     cloudinaryPublicId: image.cloudinaryPublicId,
     sortOrder: image.sortOrder,
     isHero: image.isHero,
+    isPersisted: true,
     uploadState: "uploaded",
     sourceUrl: null,
     pendingFileId: null,
@@ -195,6 +212,101 @@ function getImageLabel(imageUrl: string, fallbackIndex: number) {
   } catch {
     return `Image ${fallbackIndex + 1}`;
   }
+}
+
+function createClientId() {
+  return typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function getCompressedImageName(file: File, mimeType: string) {
+  const extension = mimeType === "image/webp" ? "webp" : "jpg";
+  const baseName = file.name.replace(/\.[^.]+$/, "") || "vehicle-image";
+
+  return `${baseName}.${extension}`;
+}
+
+function loadImageBitmap(file: File) {
+  if (typeof createImageBitmap === "function") {
+    return createImageBitmap(file);
+  }
+
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = document.createElement("img");
+    const objectUrl = URL.createObjectURL(file);
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("We could not read this image."));
+    };
+    image.src = objectUrl;
+  });
+}
+
+async function compressVehicleImage(file: File) {
+  if (
+    file.size < IMAGE_COMPRESSION_MIN_BYTES &&
+    file.size <= VEHICLE_IMAGE_UPLOAD_MAX_BYTES
+  ) {
+    return file;
+  }
+
+  if (typeof document === "undefined") {
+    return file;
+  }
+
+  const sourceImage = await loadImageBitmap(file);
+
+  if (!sourceImage) {
+    return file;
+  }
+
+  const { height, width } = sourceImage;
+  const longestEdge = Math.max(width, height);
+  const scale =
+    longestEdge > IMAGE_COMPRESSION_MAX_EDGE
+      ? IMAGE_COMPRESSION_MAX_EDGE / longestEdge
+      : 1;
+  const targetWidth = Math.max(1, Math.round(width * scale));
+  const targetHeight = Math.max(1, Math.round(height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    return file;
+  }
+
+  context.drawImage(sourceImage, 0, 0, targetWidth, targetHeight);
+
+  if ("close" in sourceImage && typeof sourceImage.close === "function") {
+    sourceImage.close();
+  }
+
+  const outputType = file.type === "image/webp" ? "image/webp" : "image/jpeg";
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(resolve, outputType, IMAGE_COMPRESSION_QUALITY);
+  });
+
+  if (!blob || blob.size >= file.size) {
+    return file;
+  }
+
+  return new File([blob], getCompressedImageName(file, blob.type || outputType), {
+    lastModified: Date.now(),
+    type: blob.type || outputType,
+  });
 }
 
 function FormSection({
@@ -296,6 +408,10 @@ export function VehicleForm({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const filePickerRef = useRef<HTMLInputElement>(null);
   const isSavingRef = useRef(false);
+  const draftUploadIdRef = useRef(createClientId());
+  const uploadPayloadPromiseRef = useRef<Promise<PreparedUploadPayload> | null>(
+    null,
+  );
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const pendingFilesRef = useRef<PendingFile[]>([]);
   const normalizedImages = useMemo(() => normalizeImages(images), [images]);
@@ -416,10 +532,6 @@ export function VehicleForm({
       current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
       return [];
     });
-  }
-
-  function formatCurrency(value: number) {
-    return value.toLocaleString("en-KE");
   }
 
   function normalizeDealerText(text: string) {
@@ -697,44 +809,6 @@ export function VehicleForm({
     return parts.join(" • ");
   }
 
-  function buildSuggestedDescription(parsed: ParsedDealerListing) {
-    const notes: string[] = [];
-
-    if (parsed.accidentFree && parsed.originalPaint) {
-      notes.push("Accident-free with original paint.");
-    } else if (parsed.accidentFree) {
-      notes.push("Accident-free unit.");
-    } else if (parsed.originalPaint) {
-      notes.push("Original paint finish.");
-    }
-
-    parsed.features?.forEach((feature) => {
-      notes.push(feature);
-    });
-
-    if (parsed.tradeInAccepted) {
-      notes.push("Trade-in accepted.");
-    }
-
-    if (parsed.hirePurchase?.depositKes || parsed.hirePurchase?.termMonths) {
-      const deposit =
-        parsed.hirePurchase.depositKes != null
-          ? `Deposit KES ${formatCurrency(parsed.hirePurchase.depositKes)}`
-          : null;
-      const term = parsed.hirePurchase.termMonths
-        ? `Balance over ${parsed.hirePurchase.termMonths} months`
-        : null;
-      const line = [deposit, term].filter(Boolean).join(", ");
-      if (line) {
-        notes.push(`Hire purchase available. ${line}.`);
-      }
-    }
-
-    parsed.notes?.forEach((note) => notes.push(note));
-
-    return notes.join(" ");
-  }
-
   function parseDealerListing(text: string): ParsedDealerListing {
     const normalized = normalizeDealerText(text);
 
@@ -936,23 +1010,13 @@ export function VehicleForm({
     if (parsed.locationId) {
       setFormValue("locationId", parsed.locationId);
     }
-    if (parsed.stockCategory) {
-      setFormValue("stockCategory", parsed.stockCategory);
-    }
-
     if (parsed.negotiable !== undefined) {
       setFormChecked("negotiable", parsed.negotiable);
     }
 
     const descriptionElement = formRef.current?.elements.namedItem("description");
-    if (
-      descriptionElement instanceof HTMLTextAreaElement &&
-      !descriptionElement.value.trim()
-    ) {
-      const description = buildSuggestedDescription(parsed);
-      if (description) {
-        descriptionElement.value = description;
-      }
+    if (descriptionElement instanceof HTMLTextAreaElement && quickPaste.trim()) {
+      descriptionElement.value = quickPaste.trim();
     }
 
     markUnsaved();
@@ -1047,9 +1111,27 @@ export function VehicleForm({
       ),
     [make, model, normalizedImages.length, quickPaste, requiredSnapshot, title, year],
   );
+  const activeUploadCount = normalizedImages.filter((image) =>
+    ["queued", "compressing", "uploading"].includes(image.uploadState || ""),
+  ).length;
+  const failedUploadCount = normalizedImages.filter(
+    (image) => image.uploadState === "failed",
+  ).length;
+  const uploadBlockingSave = activeUploadCount > 0 || failedUploadCount > 0;
+  const imageSectionSummary = `${normalizedImages.length}/${VEHICLE_IMAGE_UPLOAD_MAX_FILES}`;
+  const imageWorkflowMessage = activeUploadCount
+    ? `Uploading ${activeUploadCount} photo${activeUploadCount === 1 ? "" : "s"}...`
+    : failedUploadCount
+      ? `${failedUploadCount} photo${failedUploadCount === 1 ? "" : "s"} need retry`
+      : normalizedImages.length
+        ? "Photos upload when selected. Save when ready."
+        : "Optional draft";
 
   const saveDisabled =
-    isSaving || isSubmitting || (isEditing ? !hasUnsavedChanges : !hasDraftProgress);
+    isSaving ||
+    isSubmitting ||
+    uploadBlockingSave ||
+    (isEditing ? !hasUnsavedChanges : !hasDraftProgress);
   const hasSaveError = Boolean(state.message && !state.success);
 
   function focusFieldByName(name: string) {
@@ -1116,30 +1198,46 @@ export function VehicleForm({
   }
 
   async function prepareCloudinaryUpload() {
-    const response = await fetch("/api/admin/cloudinary/sign", {
-      body: JSON.stringify({
-        id: vehicle?.id || undefined,
-        make,
-        model,
-        title,
-        year: Number(year) || 0,
-      }),
-      headers: {
-        "content-type": "application/json",
-      },
-      method: "POST",
-    });
-    const data = (await response.json().catch(() => null)) as
-      | ({ message?: string } & Partial<PreparedUploadPayload>)
-      | null;
-
-    if (!response.ok || !data) {
-      throw new Error(
-        data?.message || "We could not prepare the Cloudinary upload.",
-      );
+    if (uploadPayloadPromiseRef.current) {
+      return uploadPayloadPromiseRef.current;
     }
 
-    return data as PreparedUploadPayload;
+    const uploadPromise = (async () => {
+      const response = await fetch("/api/admin/cloudinary/sign", {
+        body: JSON.stringify({
+          draftUploadId: draftUploadIdRef.current,
+          id: vehicle?.id || undefined,
+          make,
+          model,
+          title,
+          year: Number(year) || 0,
+        }),
+        headers: {
+          "content-type": "application/json",
+        },
+        method: "POST",
+      });
+      const data = (await response.json().catch(() => null)) as
+        | ({ message?: string } & Partial<PreparedUploadPayload>)
+        | null;
+
+      if (!response.ok || !data) {
+        throw new Error(
+          data?.message || "We could not prepare the image upload.",
+        );
+      }
+
+      return data as PreparedUploadPayload;
+    })();
+
+    uploadPayloadPromiseRef.current = uploadPromise;
+
+    try {
+      return await uploadPromise;
+    } catch (error) {
+      uploadPayloadPromiseRef.current = null;
+      throw error;
+    }
   }
 
   async function uploadFileToCloudinary(
@@ -1178,62 +1276,112 @@ export function VehicleForm({
     } satisfies UploadedPendingFile;
   }
 
-  async function uploadPendingFiles() {
-    const pendingImages = normalizedImages.filter(
-      (image): image is EditableImage & { uploadState: "pending_file"; pendingFileId: string } =>
-        image.uploadState === "pending_file" && Boolean(image.pendingFileId),
+  function updateImageByPendingId(
+    pendingFileId: string,
+    updates: Partial<EditableImage>,
+  ) {
+    setImages((current) =>
+      normalizeImages(
+        current.map((image) =>
+          image.pendingFileId === pendingFileId
+            ? {
+                ...image,
+                ...updates,
+              }
+            : image,
+        ),
+      ),
     );
-
-    if (!pendingImages.length) {
-      return {
-        newUploadPublicIds: [] as string[],
-        preparedUpload: null as PreparedUploadPayload | null,
-        uploadedByPendingId: new Map<string, UploadedPendingFile>(),
-      };
-    }
-
-    const preparedUpload = await prepareCloudinaryUpload();
-    const pendingFileLookup = new Map(
-      pendingFilesRef.current.map((item) => [item.id, item]),
-    );
-    const uploadedByPendingId = new Map<string, UploadedPendingFile>();
-    const newUploadPublicIds: string[] = [];
-
-    try {
-      for (const image of pendingImages) {
-        const pendingFile = pendingFileLookup.get(image.pendingFileId);
-
-        if (!pendingFile) {
-          throw new Error("One staged file is missing. Add it again and save.");
-        }
-
-        validateVehicleImageUpload(pendingFile.file);
-        const uploaded = await uploadFileToCloudinary(
-          pendingFile.file,
-          preparedUpload,
-        );
-        uploadedByPendingId.set(image.pendingFileId, uploaded);
-        newUploadPublicIds.push(uploaded.publicId);
-      }
-    } catch (error) {
-      if (newUploadPublicIds.length) {
-        await cleanupUploadedVehicleImagesAction(newUploadPublicIds);
-      }
-
-      throw error;
-    }
-
-    return {
-      newUploadPublicIds,
-      preparedUpload,
-      uploadedByPendingId,
-    };
   }
 
-  function reconcileSavedImages(
-    uploadedByPendingId: Map<string, UploadedPendingFile>,
-    savedImages?: VehicleImageInput[],
-  ) {
+  function removePendingFileRecord(pendingFileId: string) {
+    setPendingFiles((current) => {
+      const target = current.find((item) => item.id === pendingFileId);
+
+      if (target) {
+        URL.revokeObjectURL(target.previewUrl);
+      }
+
+      return current.filter((item) => item.id !== pendingFileId);
+    });
+  }
+
+  async function uploadOnePendingFile(pendingFile: PendingFile) {
+    try {
+      updateImageByPendingId(pendingFile.id, {
+        uploadError: null,
+        uploadProgress: 10,
+        uploadState: "compressing",
+      });
+      validateVehicleImageUploadFormat(pendingFile.file);
+
+      const uploadableFile = await compressVehicleImage(pendingFile.file).catch(
+        () => pendingFile.file,
+      );
+      validateVehicleImageUpload(uploadableFile);
+
+      updateImageByPendingId(pendingFile.id, {
+        uploadProgress: 45,
+        uploadState: "uploading",
+      });
+
+      const uploaded = await uploadFileToCloudinary(
+        uploadableFile,
+        await prepareCloudinaryUpload(),
+      );
+
+      removePendingFileRecord(pendingFile.id);
+      setImages((current) =>
+        normalizeImages(
+          current.map((image) =>
+            image.pendingFileId === pendingFile.id
+              ? {
+                  ...image,
+                  cloudinaryPublicId: uploaded.publicId,
+                  imageUrl: uploaded.secureUrl,
+                  isPersisted: false,
+                  pendingFileId: null,
+                  sourceUrl: null,
+                  uploadError: null,
+                  uploadProgress: null,
+                  uploadState: "uploaded" as const,
+                }
+              : image,
+          ),
+        ),
+      );
+
+      return uploaded;
+    } catch (error) {
+      updateImageByPendingId(pendingFile.id, {
+        uploadError:
+          error instanceof Error
+            ? error.message
+            : "This photo could not be uploaded.",
+        uploadProgress: null,
+        uploadState: "failed",
+      });
+      throw error;
+    }
+  }
+
+  async function uploadPendingFilesInQueue(nextPendingFiles: PendingFile[]) {
+    let nextIndex = 0;
+    const workers = Array.from({
+      length: Math.min(IMAGE_UPLOAD_CONCURRENCY, nextPendingFiles.length),
+    }).map(async () => {
+      while (nextIndex < nextPendingFiles.length) {
+        const pendingFile = nextPendingFiles[nextIndex];
+        nextIndex += 1;
+
+        await uploadOnePendingFile(pendingFile).catch(() => null);
+      }
+    });
+
+    await Promise.all(workers);
+  }
+
+  function reconcileSavedImages(savedImages?: VehicleImageInput[]) {
     if (savedImages) {
       setImages(normalizeImages(makeEditableImagesFromSaved(savedImages)));
       return;
@@ -1242,20 +1390,6 @@ export function VehicleForm({
     setImages((current) =>
       normalizeImages(
         current.map((image) => {
-          if (image.uploadState === "pending_file" && image.pendingFileId) {
-            const uploaded = uploadedByPendingId.get(image.pendingFileId);
-
-            return uploaded
-              ? {
-                  ...image,
-                  imageUrl: uploaded.secureUrl,
-                  cloudinaryPublicId: uploaded.publicId,
-                  sourceUrl: null,
-                  uploadState: "uploaded" as const,
-                }
-              : image;
-          }
-
           if (image.uploadState === "pending_url") {
             return {
               ...image,
@@ -1274,28 +1408,18 @@ export function VehicleForm({
     );
   }
 
-  function buildSubmissionImages(
-    uploadedByPendingId: Map<string, UploadedPendingFile>,
-  ): VehicleImageInput[] {
+  function buildSubmissionImages(): VehicleImageInput[] {
     return normalizedImages.map((image) => {
-      if (image.uploadState === "pending_file") {
-        const uploaded = image.pendingFileId
-          ? uploadedByPendingId.get(image.pendingFileId)
-          : null;
+      if (
+        image.uploadState === "queued" ||
+        image.uploadState === "compressing" ||
+        image.uploadState === "uploading"
+      ) {
+        throw new Error("Wait for photo uploads to finish before saving.");
+      }
 
-        if (!uploaded) {
-          throw new Error("One staged file is missing. Add it again and save.");
-        }
-
-        return {
-          altText: image.altText,
-          cloudinaryPublicId: uploaded.publicId,
-          imageUrl: uploaded.secureUrl,
-          isHero: image.isHero,
-          sortOrder: image.sortOrder,
-          sourceUrl: null,
-          uploadState: "uploaded",
-        } satisfies VehicleImageInput;
+      if (image.uploadState === "failed") {
+        throw new Error("Retry or remove failed photos before saving.");
       }
 
       if (image.uploadState === "pending_url") {
@@ -1338,26 +1462,15 @@ export function VehicleForm({
         title,
         year: Number(year) || 0,
       });
-      const {
-        newUploadPublicIds,
-        preparedUpload,
-        uploadedByPendingId,
-      } = await uploadPendingFiles();
       const formData = new FormData(formRef.current);
       formData.set(
         "imagesJson",
-        JSON.stringify(buildSubmissionImages(uploadedByPendingId)),
+        JSON.stringify(buildSubmissionImages()),
       );
-      formData.set("newUploadPublicIdsJson", JSON.stringify(newUploadPublicIds));
-
-      if (preparedUpload) {
-        formData.set("resolvedStockCode", preparedUpload.stockCode);
-        formData.set("resolvedSlug", preparedUpload.slug);
-      } else {
-        formData.set("resolvedStockCode", draftIdentifiers.stockCode);
-        if (draftIdentifiers.slug) {
-          formData.set("resolvedSlug", draftIdentifiers.slug);
-        }
+      formData.set("newUploadPublicIdsJson", JSON.stringify([]));
+      formData.set("resolvedStockCode", draftIdentifiers.stockCode);
+      if (draftIdentifiers.slug) {
+        formData.set("resolvedSlug", draftIdentifiers.slug);
       }
 
       const result = await saveVehicleAction(initialState, formData);
@@ -1368,7 +1481,7 @@ export function VehicleForm({
       }
 
       if (result.success) {
-        reconcileSavedImages(uploadedByPendingId, result.savedImages);
+        reconcileSavedImages(result.savedImages);
         clearPendingFiles();
         setState(initialState);
         setHasUnsavedChanges(false);
@@ -1392,6 +1505,14 @@ export function VehicleForm({
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isSavingRef.current) {
+      return;
+    }
+    if (uploadBlockingSave) {
+      setGlobalError(
+        activeUploadCount
+          ? "Wait for photo uploads to finish before saving."
+          : "Retry or remove failed photos before saving.",
+      );
       return;
     }
 
@@ -1466,6 +1587,7 @@ export function VehicleForm({
         ...current,
         {
           imageUrl: nextUrl,
+          isPersisted: false,
           sourceUrl: nextUrl,
           sortOrder: current.length,
           isHero: current.length === 0,
@@ -1486,11 +1608,8 @@ export function VehicleForm({
       ensureImageLimit(normalizedImages.length + files.length);
 
       const nextPendingFiles = Array.from(files).map((file) => {
-        validateVehicleImageUpload(file);
-        const pendingFileId =
-          typeof crypto !== "undefined" && crypto.randomUUID
-            ? crypto.randomUUID()
-            : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        validateVehicleImageUploadFormat(file);
+        const pendingFileId = createClientId();
 
         return {
           id: pendingFileId,
@@ -1509,14 +1628,18 @@ export function VehicleForm({
           ...nextPendingFiles.map((item, index) => ({
             imageUrl: item.previewUrl,
             cloudinaryPublicId: null,
+            isPersisted: false,
             sortOrder: current.length + index,
             isHero: current.length + index === 0,
-            uploadState: "pending_file" as const,
+            uploadError: null,
+            uploadProgress: 0,
+            uploadState: "queued" as const,
             pendingFileId: item.id,
             sourceUrl: null,
           })),
         ]),
       );
+      void uploadPendingFilesInQueue(nextPendingFiles);
     } catch (error) {
       setUploadError(
         error instanceof Error
@@ -1535,27 +1658,45 @@ export function VehicleForm({
     setImages((current) => {
       const removedImage = current[index];
 
+      if (removedImage?.pendingFileId) {
+        removePendingFileRecord(removedImage.pendingFileId);
+      }
+
       if (
-        removedImage?.uploadState === "pending_file" &&
-        removedImage.pendingFileId
+        removedImage?.uploadState === "uploaded" &&
+        removedImage.cloudinaryPublicId &&
+        !removedImage.isPersisted
       ) {
-        setPendingFiles((pendingCurrent) => {
-          const target = pendingCurrent.find(
-            (item) => item.id === removedImage.pendingFileId,
-          );
-
-          if (target) {
-            URL.revokeObjectURL(target.previewUrl);
-          }
-
-          return pendingCurrent.filter(
-            (item) => item.id !== removedImage.pendingFileId,
-          );
-        });
+        void cleanupUploadedVehicleImagesAction([
+          removedImage.cloudinaryPublicId,
+        ]);
       }
 
       return normalizeImages(current.filter((_, item) => item !== index));
     });
+  }
+
+  function retryImageUpload(pendingFileId: string) {
+    const pendingFile = pendingFilesRef.current.find(
+      (item) => item.id === pendingFileId,
+    );
+
+    if (!pendingFile) {
+      updateImageByPendingId(pendingFileId, {
+        uploadError: "This photo is no longer available. Remove it and add it again.",
+        uploadState: "failed",
+      });
+      return;
+    }
+
+    setUploadError("");
+    markUnsaved();
+    updateImageByPendingId(pendingFileId, {
+      uploadError: null,
+      uploadProgress: 0,
+      uploadState: "queued",
+    });
+    void uploadPendingFilesInQueue([pendingFile]);
   }
 
   function moveImageUp(index: number) {
@@ -1618,7 +1759,7 @@ export function VehicleForm({
 
         <section className="flex items-center justify-between rounded-xl border border-[#c5c6cf] bg-white p-4 shadow-[0_2px_4px_rgba(3,22,53,0.05)]">
           <div className="flex items-center gap-2">
-            {hasSaveError || requiredMissing.length ? (
+            {hasSaveError || uploadBlockingSave || requiredMissing.length ? (
               <AlertCircle className="size-5 text-[#5d4217]" />
             ) : (
               <CheckCircle2 className="size-5 fill-green-600 text-green-600" />
@@ -1626,20 +1767,28 @@ export function VehicleForm({
             <span
               className={cn(
                 "text-sm font-medium leading-5",
-                hasSaveError || requiredMissing.length
+                hasSaveError || uploadBlockingSave || requiredMissing.length
                   ? "text-[#5d4217]"
                   : "text-green-700",
               )}
             >
               {hasSaveError
                 ? "Needs review"
-                : isSaving || isSubmitting
+                : activeUploadCount
+                  ? "Uploading photos"
+                  : failedUploadCount
+                    ? "Photo upload failed"
+                    : isSaving || isSubmitting
                   ? "Saving changes"
                   : "Ready to create"}
             </span>
           </div>
           <span className="rounded-full bg-[#e8c08a]/20 px-3 py-1 text-[11px] font-semibold leading-4 tracking-[0.03em] text-[#5d4217]">
-            {requiredMissing.length
+            {activeUploadCount
+              ? `${activeUploadCount} uploading`
+              : failedUploadCount
+                ? `${failedUploadCount} failed`
+                : requiredMissing.length
               ? `${requiredMissing.length} missing`
               : "Ready"}
           </span>
@@ -1994,7 +2143,7 @@ export function VehicleForm({
           id="vehicle-gallery"
           title="Images"
           description="Add listing photos from the phone gallery or from a URL."
-          summary={normalizedImages.length ? `${normalizedImages.length} staged` : "Optional draft"}
+          summary={imageSectionSummary}
           className="order-5"
         >
           <input
@@ -2020,6 +2169,20 @@ export function VehicleForm({
                 Add photos from phone
               </span>
             </button>
+          </div>
+
+          <div
+            className={cn(
+              "rounded-lg border px-3 py-2 text-xs leading-4",
+              failedUploadCount
+                ? "border-red-200 bg-red-50 text-red-700"
+                : activeUploadCount
+                  ? "border-[#c5c6cf] bg-[#ecf5fe] text-[#1a2b4b]"
+                  : "border-[#c5c6cf] bg-white text-[#44474e]",
+            )}
+            role={failedUploadCount ? "alert" : "status"}
+          >
+            {imageWorkflowMessage}
           </div>
 
           <details className="group">
@@ -2069,9 +2232,25 @@ export function VehicleForm({
           {normalizedImages.length ? (
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {normalizedImages.map((image, index) => {
-                const isPending =
-                  image.uploadState === "pending_file" ||
-                  image.uploadState === "pending_url";
+                const isPending = image.uploadState === "pending_url";
+                const isActiveUpload =
+                  image.uploadState === "queued" ||
+                  image.uploadState === "compressing" ||
+                  image.uploadState === "uploading";
+                const uploadStatusLabel =
+                  image.uploadState === "pending_url"
+                    ? "Imports on save"
+                    : image.uploadState === "queued"
+                      ? "Queued"
+                      : image.uploadState === "compressing"
+                        ? "Preparing"
+                        : image.uploadState === "uploading"
+                          ? "Uploading"
+                          : image.uploadState === "failed"
+                            ? "Failed"
+                            : image.isPersisted
+                              ? "Saved"
+                              : "Uploaded";
 
                 return (
                   <div
@@ -2088,12 +2267,21 @@ export function VehicleForm({
                       />
                       <div className="absolute left-2 top-2 flex flex-wrap gap-1.5">
                         {image.isHero ? <Badge variant="accent">Hero</Badge> : null}
-                        <Badge variant={isPending ? "muted" : "success"}>
-                          {image.uploadState === "pending_url"
-                            ? "Imports on save"
-                            : isPending
-                              ? "Uploads on save"
-                              : "Saved"}
+                        <Badge
+                          variant={
+                            image.uploadState === "failed"
+                              ? "muted"
+                              : isPending || isActiveUpload
+                                ? "muted"
+                                : "success"
+                          }
+                          className={
+                            image.uploadState === "failed"
+                              ? "border-red-200 bg-red-50 text-red-700"
+                              : undefined
+                          }
+                        >
+                          {uploadStatusLabel}
                         </Badge>
                       </div>
                     </div>
@@ -2105,6 +2293,26 @@ export function VehicleForm({
                       <p className="mt-1 truncate text-xs text-stone-500">
                         {image.imageUrl}
                       </p>
+                      {isActiveUpload ? (
+                        <div className="space-y-1" role="status">
+                          <div className="h-1.5 overflow-hidden rounded-full bg-[#e9ecef]">
+                            <div
+                              className="h-full rounded-full bg-[#1a2b4b] transition-all"
+                              style={{
+                                width: `${image.uploadProgress || 10}%`,
+                              }}
+                            />
+                          </div>
+                          <p className="text-xs text-[#44474e]">
+                            {uploadStatusLabel}...
+                          </p>
+                        </div>
+                      ) : null}
+                      {image.uploadState === "failed" ? (
+                        <p className="rounded-lg bg-red-50 px-2 py-1.5 text-xs leading-4 text-red-700">
+                          {image.uploadError || "Upload failed."}
+                        </p>
+                      ) : null}
                       <Input
                         aria-label={`Alt text for image ${index + 1}`}
                         placeholder="Alt text"
@@ -2124,6 +2332,17 @@ export function VehicleForm({
                       />
 
                       <div className="grid grid-cols-2 gap-2">
+                        {image.uploadState === "failed" && image.pendingFileId ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => retryImageUpload(image.pendingFileId!)}
+                            className="col-span-2 rounded-lg"
+                          >
+                            Retry upload
+                          </Button>
+                        ) : null}
                         <Button
                           type="button"
                           size="sm"
@@ -2173,6 +2392,9 @@ export function VehicleForm({
           description="Keep the copy short and sales-led so the website reads cleanly."
           className="order-6"
         >
+          <Label htmlFor="description" className="sr-only">
+            Description
+          </Label>
           <Textarea
             id="description"
             name="description"
@@ -2181,7 +2403,7 @@ export function VehicleForm({
               "min-h-[120px] resize-none rounded-lg border-[#c5c6cf] bg-white p-2 text-sm leading-5 focus-visible:border-[#1a2b4b] focus-visible:ring-0",
               getFieldProps("description").className,
             )}
-            placeholder="Clean unit, buy-and-drive. Well maintained with full service history..."
+            placeholder="Paste or keep the dealer message here..."
             aria-invalid={getFieldProps("description")["aria-invalid"]}
             aria-describedby={getFieldProps("description")["aria-describedby"]}
           />
@@ -2198,7 +2420,6 @@ export function VehicleForm({
           className="order-7"
         >
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <Label
                 htmlFor="status"
@@ -2223,38 +2444,6 @@ export function VehicleForm({
                 id={getFieldErrorId("status")}
                 error={getFieldError("status")}
               />
-            </div>
-            <div className="space-y-1">
-              <Label
-                htmlFor="stockCategory"
-                className="text-sm font-medium leading-5 text-[#44474e]"
-              >
-                Stock category
-              </Label>
-              <select
-                id="stockCategory"
-                name="stockCategory"
-                defaultValue={vehicle?.stockCategory || "used"}
-                className={cn(
-                  selectClassName,
-                  getFieldProps("stockCategory").className,
-                )}
-                aria-invalid={getFieldProps("stockCategory")["aria-invalid"]}
-                aria-describedby={getFieldProps("stockCategory")["aria-describedby"]}
-              >
-                <option value="new">New</option>
-                <option value="used">Used</option>
-                <option value="imported">Imported</option>
-                <option value="available_for_importation">
-                  Available for importation
-                </option>
-                <option value="traded_in">Traded-in</option>
-              </select>
-              <FieldError
-                id={getFieldErrorId("stockCategory")}
-                error={getFieldError("stockCategory")}
-              />
-            </div>
             </div>
             <label className="flex cursor-pointer items-center gap-2 rounded-lg bg-[#ecf5fe] p-2">
               <input
@@ -2281,28 +2470,38 @@ export function VehicleForm({
               <p
                 className={cn(
                   "text-[11px] font-semibold leading-4 tracking-[0.03em]",
-                  hasSaveError || requiredMissing.length
+                  hasSaveError || uploadBlockingSave || requiredMissing.length
                     ? "text-[#44474e]"
                     : "text-green-700",
                 )}
               >
                 {isSaving || isSubmitting
                   ? "Saving"
-                  : hasSaveError
-                    ? "Failed"
-                    : requiredMissing.length
-                      ? "Incomplete"
-                      : "Complete"}
+                  : activeUploadCount
+                    ? "Uploading"
+                    : failedUploadCount
+                      ? "Upload failed"
+                      : hasSaveError
+                        ? "Failed"
+                        : requiredMissing.length
+                          ? "Incomplete"
+                          : "Complete"}
               </p>
               <p className="mt-0.5 inline-flex items-center gap-1 text-sm font-bold leading-5 text-[#3e2700]">
                 {requiredMissing.length ? (
                   <AlertCircle className="size-4 fill-[#3e2700]" />
+                ) : uploadBlockingSave ? (
+                  <AlertCircle className="size-4 fill-[#3e2700]" />
                 ) : (
                   <CheckCircle2 className="size-4 fill-green-600 text-green-600" />
                 )}
-                {requiredMissing.length
-                  ? `${requiredMissing.length} missing`
-                  : "Ready"}
+                {activeUploadCount
+                  ? `${activeUploadCount} uploading`
+                  : failedUploadCount
+                    ? `${failedUploadCount} failed`
+                    : requiredMissing.length
+                      ? `${requiredMissing.length} missing`
+                      : "Ready"}
               </p>
             </div>
             <Button

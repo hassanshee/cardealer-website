@@ -8,6 +8,24 @@ import {
 } from "@/lib/utils";
 import type { VehicleFormInput, VehicleImageInput } from "@/types/dealership";
 
+export function deriveStockCategoryFromCondition(condition: string) {
+  const normalizedCondition = condition.trim().toLowerCase();
+
+  if (/trade|traded/.test(normalizedCondition)) {
+    return "traded_in" as const;
+  }
+
+  if (/brand new|new registration/.test(normalizedCondition)) {
+    return "new" as const;
+  }
+
+  if (/foreign used/.test(normalizedCondition)) {
+    return "imported" as const;
+  }
+
+  return "used" as const;
+}
+
 type RawVehicleImageInput = Omit<VehicleImageInput, "uploadState"> & {
   uploadState?: string;
 };
@@ -159,7 +177,8 @@ export function mapVehicleFormData(formData: FormData): VehicleFormInput {
     featured: isTruthy(formData.get("featured")),
     status: asOptionalString(formData.get("status")) || "draft",
     stockCategory:
-      asOptionalString(formData.get("stockCategory")) || "used",
+      asOptionalString(formData.get("stockCategory")) ||
+      deriveStockCategoryFromCondition(asOptionalString(formData.get("condition")) || ""),
     description: asOptionalString(formData.get("description")) || "",
     images: parseImages(asOptionalString(formData.get("imagesJson"))),
   };

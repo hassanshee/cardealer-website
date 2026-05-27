@@ -371,6 +371,7 @@ export function VehicleGallery({
                   src={getGalleryImageUrl(image, "thumb")}
                   alt={getGalleryAltText(image, index, title)}
                   fill
+                  loading="lazy"
                   sizes="112px"
                   className="object-cover"
                 />
@@ -466,6 +467,7 @@ export function VehicleGallery({
                       src={getGalleryImageUrl(image, "thumb")}
                       alt={getGalleryAltText(image, index, title)}
                       fill
+                      loading="lazy"
                       sizes="96px"
                       className="object-cover"
                     />

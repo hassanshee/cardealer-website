@@ -10,11 +10,25 @@ import { buildVehicleDraftIdentifiers } from "@/lib/vehicle-form";
 
 const requestSchema = z.object({
   id: z.string().trim().optional(),
+  draftUploadId: z
+    .string()
+    .trim()
+    .regex(/^[a-zA-Z0-9-]+$/)
+    .max(64)
+    .optional(),
   make: z.string().trim().default(""),
   model: z.string().trim().default(""),
   title: z.string().trim().default(""),
   year: z.coerce.number().int().min(0).default(0),
 });
+
+function getDraftAssetFolder(draftUploadId?: string) {
+  if (!draftUploadId) {
+    return undefined;
+  }
+
+  return `vehicle-drafts/${draftUploadId.toLowerCase().slice(0, 32)}`;
+}
 
 export async function POST(request: Request) {
   const session = await requireAdminSession();
@@ -35,6 +49,10 @@ export async function POST(request: Request) {
       vehicles,
     );
     const signature = buildVehicleImageUploadSignature({
+      assetFolder:
+        resolvedIdentifiers.stockCode === "AUTO-STOCK"
+          ? getDraftAssetFolder(payload.draftUploadId)
+          : undefined,
       stockCode: resolvedIdentifiers.stockCode,
     });
 

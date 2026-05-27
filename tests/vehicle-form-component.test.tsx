@@ -4,7 +4,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   cleanupUploadedVehicleImagesAction: vi.fn(),
@@ -128,10 +128,12 @@ describe("VehicleForm", () => {
       />,
     );
 
+    const dealerMessage =
+      "Toyota Harrier 2017 petrol automatic 83,000 km Ksh 3.4M Mombasa very clean";
+
     fireEvent.change(screen.getByLabelText(/dealer message/i), {
       target: {
-        value:
-          "Toyota Harrier 2017 petrol automatic 83,000 km Ksh 3.4M Mombasa very clean",
+        value: dealerMessage,
       },
     });
     fireEvent.click(screen.getByRole("button", { name: /parse & fill/i }));
@@ -145,6 +147,8 @@ describe("VehicleForm", () => {
     expect(screen.getByLabelText(/transmission/i)).toHaveValue("Automatic");
     expect(screen.getByLabelText(/fuel type/i)).toHaveValue("Petrol");
     expect(screen.getByLabelText(/location/i)).toHaveValue("mombasa");
+    expect(screen.getByLabelText(/description/i)).toHaveValue(dealerMessage);
+    expect(screen.queryByLabelText(/stock category/i)).not.toBeInTheDocument();
   });
 
   it("surfaces field-level save errors inline after submission", async () => {
@@ -219,6 +223,94 @@ describe("VehicleForm", () => {
     ).toBeInTheDocument();
   });
 
+  it("uploads selected phone photos while staging and submits uploaded image data", async () => {
+    mockSuccessfulFileUpload();
+    mocks.saveVehicleAction.mockResolvedValueOnce({
+      success: true,
+      message: "Vehicle saved successfully.",
+      savedImages: [
+        {
+          imageUrl: "https://cdn.example.com/corolla-front.jpg",
+          cloudinaryPublicId: "vehicles/corolla-front",
+          sortOrder: 0,
+          isHero: true,
+          uploadState: "uploaded",
+          sourceUrl: null,
+        },
+      ],
+    });
+
+    const { container } = render(
+      <VehicleForm locations={[]} vehicle={buildVehicle()} />,
+    );
+
+    selectImageFile(container);
+
+    await waitFor(() => {
+      expect(screen.getByText("Uploaded")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /save changes/i }));
+
+    await waitFor(() => {
+      expect(mocks.saveVehicleAction).toHaveBeenCalledTimes(1);
+    });
+
+    const submittedFormData = mocks.saveVehicleAction.mock.calls[0][1] as FormData;
+    const images = JSON.parse(
+      String(submittedFormData.get("imagesJson")),
+    ) as Array<{ cloudinaryPublicId?: string; imageUrl?: string }>;
+
+    expect(images[0]).toMatchObject({
+      cloudinaryPublicId: "vehicles/corolla-front",
+      imageUrl: "https://cdn.example.com/corolla-front.jpg",
+    });
+    expect(submittedFormData.get("newUploadPublicIdsJson")).toBe("[]");
+  });
+
+  it("blocks saving while selected photos are still uploading", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => new Promise<Response>(() => {})),
+    );
+
+    const { container } = render(
+      <VehicleForm locations={[]} vehicle={buildVehicle()} />,
+    );
+
+    selectImageFile(container, "uploading.jpg");
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /save changes/i })).toBeDisabled();
+    });
+    expect(await screen.findByText(/uploading 1 photo/i)).toBeInTheDocument();
+  });
+
+  it("shows retry controls when a staged photo upload fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(JSON.stringify({ message: "Upload service unavailable." }), {
+          status: 503,
+        }),
+      ),
+    );
+
+    const { container } = render(
+      <VehicleForm locations={[]} vehicle={buildVehicle()} />,
+    );
+
+    selectImageFile(container, "failed.jpg");
+
+    expect(
+      await screen.findByText("Upload service unavailable."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /retry upload/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /save changes/i })).toBeDisabled();
+  });
+
   it("prevents duplicate submits while a save is in flight", async () => {
     let resolveSave: (
       value: Awaited<ReturnType<typeof mocks.saveVehicleAction>>,
@@ -259,3 +351,56 @@ describe("VehicleForm", () => {
     });
   });
 });
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+function mockSuccessfulFileUpload() {
+  const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+    const url = String(input);
+
+    if (url.includes("/api/admin/cloudinary/sign")) {
+      return new Response(
+        JSON.stringify({
+          allowedFormats: ["jpg", "jpeg", "png", "webp"],
+          apiKey: "cloudinary-key",
+          assetFolder: "vehicle-drafts/test",
+          signature: "signature",
+          slug: "2021-toyota-corolla",
+          stockCode: "COR-001",
+          timestamp: 1,
+          uploadUrl: "https://cloudinary.example.com/upload",
+        }),
+        { status: 200 },
+      );
+    }
+
+    return new Response(
+      JSON.stringify({
+        public_id: "vehicles/corolla-front",
+        secure_url: "https://cdn.example.com/corolla-front.jpg",
+      }),
+      { status: 200 },
+    );
+  });
+
+  vi.stubGlobal("fetch", fetchMock);
+
+  return fetchMock;
+}
+
+function selectImageFile(container: HTMLElement, name = "front.jpg") {
+  const fileInput = container.querySelector(
+    'input[type="file"]',
+  ) as HTMLInputElement;
+  const file = new File(["image"], name, { type: "image/jpeg" });
+
+  fireEvent.change(fileInput, {
+    target: {
+      files: [file],
+    },
+  });
+
+  return file;
+}

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { VEHICLE_IMAGE_UPLOAD_MAX_FILES } from "@/lib/vehicle-image-upload";
 import {
   stockCategories,
   vehicleConditionOptions,
@@ -82,7 +83,12 @@ export const vehicleFormSchema = z
     status: z.enum(vehicleStatuses),
     stockCategory: z.enum(stockCategories),
     description: z.string().trim().min(20, "Enter a stronger description."),
-    images: z.array(vehicleImageSchema),
+    images: z
+      .array(vehicleImageSchema)
+      .max(
+        VEHICLE_IMAGE_UPLOAD_MAX_FILES,
+        `Each vehicle can include up to ${VEHICLE_IMAGE_UPLOAD_MAX_FILES} images.`,
+      ),
   })
   .superRefine((vehicle, context) => {
     if (vehicle.status === "published" && vehicle.images.length === 0) {
