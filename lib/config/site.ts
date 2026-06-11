@@ -19,7 +19,7 @@ export const siteConfig = {
   name: "Ocean Motors",
   shortName: "Ocean Motors",
   description:
-    "Browse used, imported, and traded-in cars in Mombasa with stronger trust signals, clear pricing, and fast enquiry options.",
+"Discover used, imported, and trade-in vehicles in Mombasa with transparent pricing, verified listings, and instant inquiry options.",
   tagline: "Trusted cars. Faster answers. Better buying confidence in Mombasa.",
   contactNumbers: dealershipContactNumbers,
   phoneDisplay: primaryContactNumber.display,
