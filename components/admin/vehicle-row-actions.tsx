@@ -51,8 +51,8 @@ export function VehicleRowActions({
     featureState.success || statusState.success || deleteState.success;
 
   const menuPanelClass = compact
-    ? "absolute right-0 top-[calc(100%+0.5rem)] z-20 w-56 rounded-xl border border-border/70 bg-white p-2 shadow-[0_20px_48px_rgba(15,23,42,0.14)]"
-    : "absolute right-0 top-[calc(100%+0.75rem)] z-20 w-72 max-h-[70vh] overflow-y-auto rounded-[24px] border border-border/70 bg-white p-3 shadow-[0_20px_48px_rgba(15,23,42,0.14)]";
+    ? "absolute md:right-0 top-[calc(100%+0.5rem)] z-20 w-56 rounded-xl border border-border/70 bg-white p-2 shadow-[0_20px_48px_rgba(15,23,42,0.14)]"
+    : "absolute md:right-0 top-[calc(100%+0.75rem)] z-20 w-72 max-h-[70vh] overflow-y-auto rounded-[24px] border border-border/70 bg-white p-3 shadow-[0_20px_48px_rgba(15,23,42,0.14)]";
   const actionButtonClass = compact
     ? "h-8 w-full justify-start rounded-md px-2 text-xs"
     : "w-full justify-start rounded-2xl";
