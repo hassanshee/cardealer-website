@@ -33,6 +33,7 @@ export function VehicleRowActions({
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  
   const [featureState, featureAction] = useActionState(
     toggleVehicleFeaturedAction,
     initialState,
@@ -45,8 +46,10 @@ export function VehicleRowActions({
     deleteVehicleAction,
     initialState,
   );
+
   const hasSuccessfulAction =
     featureState.success || statusState.success || deleteState.success;
+
   const menuPanelClass = compact
     ? "absolute right-0 top-[calc(100%+0.5rem)] z-20 w-56 rounded-xl border border-border/70 bg-white p-2 shadow-[0_20px_48px_rgba(15,23,42,0.14)]"
     : "absolute right-0 top-[calc(100%+0.75rem)] z-20 w-72 max-h-[70vh] overflow-y-auto rounded-[24px] border border-border/70 bg-white p-3 shadow-[0_20px_48px_rgba(15,23,42,0.14)]";
@@ -62,8 +65,10 @@ export function VehicleRowActions({
     setConfirmDelete(false);
   }
 
+  // Closes menu and refreshes layout ONLY after server actions succeed
   useEffect(() => {
     if (hasSuccessfulAction) {
+      closeActionMenu();
       router.refresh();
     }
   }, [hasSuccessfulAction, router]);
@@ -71,8 +76,7 @@ export function VehicleRowActions({
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
       if (!menuRef.current?.contains(event.target as Node)) {
-        setMenuOpen(false);
-        setConfirmDelete(false);
+        closeActionMenu();
       }
     }
 
@@ -127,7 +131,6 @@ export function VehicleRowActions({
                   size="sm"
                   variant="ghost"
                   className={actionButtonClass}
-                  onClick={closeActionMenu}
                 >
                   <Star className="size-4" />
                   {featured ? "Unfeature" : "Feature"}
@@ -142,7 +145,6 @@ export function VehicleRowActions({
                     size="sm"
                     variant="ghost"
                     className={actionButtonClass}
-                    onClick={closeActionMenu}
                   >
                     Publish
                   </SubmitButton>
@@ -155,7 +157,6 @@ export function VehicleRowActions({
                     size="sm"
                     variant="ghost"
                     className={actionButtonClass}
-                    onClick={closeActionMenu}
                   >
                     Unpublish
                   </SubmitButton>
@@ -170,7 +171,6 @@ export function VehicleRowActions({
                     size="sm"
                     variant="ghost"
                     className={actionButtonClass}
-                    onClick={closeActionMenu}
                   >
                     Mark sold
                   </SubmitButton>
@@ -210,7 +210,6 @@ export function VehicleRowActions({
                       <SubmitButton
                         size="sm"
                         className={deleteButtonClass}
-                        onClick={closeActionMenu}
                       >
                         Confirm delete
                       </SubmitButton>

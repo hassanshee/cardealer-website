@@ -11,7 +11,7 @@ export function MobileCtaBar({
   phoneHref: string;
 }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/96 px-0 py-2 shadow-[0_-12px_28px_rgba(28,35,43,0.08)] lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/96 px-0 py-2 shadow-[0_-12px_28px_rgba(28,35,43,0.08)] lg:hidden" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
       <div className="container-shell grid grid-cols-[1.8fr_1fr] gap-1.5">
         <Button
           asChild

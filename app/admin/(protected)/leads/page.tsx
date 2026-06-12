@@ -296,7 +296,7 @@ export default async function AdminLeadsPage({
                 className={cn(
                   "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition-colors",
                   isActive
-                    ? "border-stone-950 bg-stone-950 text-white"
+                    ? "border-accent bg-accent text-white"
                     : "border-border bg-white text-stone-700 hover:bg-stone-50",
                 )}
               >

@@ -25,6 +25,7 @@ export function HomeHeroVisual({
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const rotatingImages = backgroundImages;
   const activeBackgroundImage = rotatingImages.length
@@ -32,6 +33,8 @@ export function HomeHeroVisual({
     : null;
 
   useEffect(() => {
+    setIsHydrated(true);
+
     const desktopQuery = window.matchMedia("(min-width: 1024px)");
     const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
