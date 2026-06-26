@@ -1,25 +1,67 @@
-# Cardealer Website
+# Ocean Motors – Car Dealer Website
 
-A production-oriented dealership MVP built with Next.js, TypeScript, Tailwind CSS, Supabase, and Cloudinary, with Resend supported as an optional notification layer. The project is designed for fast inventory browsing, strong lead capture, and a minimal admin workflow.
+A production-ready dealership platform built with Next.js, TypeScript, Tailwind CSS, Supabase, and Cloudinary. The application is designed for fast vehicle browsing, efficient lead generation, and a streamlined administrative workflow.
 
-## Stack
+## Live Demo
+
+🌐 https://oceanmotors.app
+
+## Features
+
+- Modern responsive dealership website
+- Vehicle inventory management
+- Vehicle detail pages
+- Lead and viewing request forms
+- Secure admin dashboard
+- Cloudinary image management
+- Supabase database and authentication
+- Demo mode for local development
+- Optional email notifications via Resend
+
+## Tech Stack
+
 - Next.js 16 App Router
 - TypeScript
 - Tailwind CSS v4
 - Supabase
 - Cloudinary
-- Resend (optional / deferred)
+- Resend (optional)
 - Vitest
 
-## Local Setup
-1. Install dependencies:
-   `npm.cmd install`
-2. Copy `.env.example` to `.env.local`.
-3. Fill in Supabase and Cloudinary credentials. Add Resend only when a sender domain is ready.
-4. Start the app:
-   `npm.cmd run dev`
+---
 
-## Environment Variables
+# Local Setup
+
+1. Install dependencies
+
+```bash
+npm.cmd install
+```
+
+2. Copy the environment file
+
+```bash
+cp .env.example .env.local
+```
+
+3. Configure:
+
+- Supabase
+- Cloudinary
+- Resend (optional)
+
+4. Start the development server
+
+```bash
+npm.cmd run dev
+```
+
+---
+
+# Environment Variables
+
+Required:
+
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
@@ -28,99 +70,250 @@ A production-oriented dealership MVP built with Next.js, TypeScript, Tailwind CS
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
 - `ADMIN_NOTIFICATION_EMAIL`
-- `RESEND_API_KEY` (optional)
 
-## Demo Mode
-- If Supabase is not configured, the site runs with demo inventory and a demo admin mode.
-- Demo admin credentials are documented in the app UI and intended only for local review.
-- Demo mode keeps the public site and admin workflow usable without external services, but data is not persistent across process restarts.
+Optional:
 
-## Supabase Setup
+- `RESEND_API_KEY`
+
+---
+
+# Demo Mode
+
+If Supabase is not configured, the application automatically runs in Demo Mode.
+
+Demo Mode includes:
+
+- Demo vehicle inventory
+- Demo admin access
+- Fully functional UI for local evaluation
+
+Data is not persisted between application restarts.
+
+---
+
+# Supabase Setup
+
 1. Create a new Supabase project.
-2. Run all SQL migrations in `supabase/migrations/` in order (yes, you do need to run them).
-   - Quick option (dashboard): open SQL editor and run:
-     - `supabase/migrations/001_initial_schema.sql`
-     - `supabase/migrations/002_add_vehicle_stock_code.sql`
-     - `supabase/migrations/003_add_lead_inbox_state.sql`
-   - CLI option (if you use Supabase CLI): `supabase db push`
-3. Optionally run `supabase/seed/001_demo_seed.sql` for starter data.
-4. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SECRET_KEY` in `.env.local`.
-5. Create/invite an auth user for the admin in Supabase Auth.
-6. Insert that user into `admin_profiles` to grant access, e.g.:
-   ```sql
-   insert into public.admin_profiles (user_id, email, full_name)
-   values ('<auth_user_uuid>', 'admin@example.com', 'Admin Name');
-   ```
-7. To remove access:
-   ```sql
-   delete from public.admin_profiles
-   where user_id = '<auth_user_uuid>';
-   ```
 
-## Supabase Connection Layer
-- Browser client: `lib/supabase/client.ts`
-- SSR/auth client: `lib/supabase/server.ts`
-- Server-only secret client for scripts: `lib/supabase/admin.ts`
-- SSR auth refresh proxy: `proxy.ts` and `lib/supabase/middleware.ts`
-- Typed database contract: `types/database.ts`
+2. Run every SQL migration inside:
 
-## Supabase Verification
-- Read-only connectivity check: `npm.cmd run supabase:check`
-- Read + write + cleanup check: `npm.cmd run supabase:check:write`
-- The write check inserts a temporary draft vehicle and deletes it immediately after a successful test.
+```
+supabase/migrations/
+```
 
-## Cloudinary Setup
-- Create a Cloudinary environment.
-- Add the cloud name, API key, and API secret to the app environment.
-- Vehicle image uploads use Cloudinary when credentials are present.
-- Folder-to-Supabase sync script: `scripts/sync-cloudinary-vehicle-images.mjs`
-- Usage guide: `scripts/README-cloudinary-sync.md`
+Either:
 
-## Resend Setup
-- Resend is optional for the current deployment.
-- If `RESEND_API_KEY` is missing, forms still save successfully and the app skips outbound notification email.
-- When a sender domain is ready, add the API key and set `ADMIN_NOTIFICATION_EMAIL` to the sales inbox that should receive lead notifications.
+Dashboard SQL Editor
 
-## Verification Commands
-- Lint: `npm.cmd run lint`
-- Typecheck: `npm.cmd run typecheck`
-- Tests: `npm.cmd run test`
-- Production build: `npm.cmd run build`
+```
+001_initial_schema.sql
+002_add_vehicle_stock_code.sql
+003_add_lead_inbox_state.sql
+```
 
-## Deployment
-1. Push the repository to a Git provider.
+or
+
+```bash
+supabase db push
+```
+
+3. (Optional)
+
+Load demo data
+
+```
+supabase/seed/001_demo_seed.sql
+```
+
+4. Configure:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SECRET_KEY`
+
+5. Create an admin user inside Supabase Auth.
+
+6. Grant admin access
+
+```sql
+insert into public.admin_profiles (user_id, email, full_name)
+values (
+    '<auth_user_uuid>',
+    'admin@example.com',
+    'Admin Name'
+);
+```
+
+Remove admin access:
+
+```sql
+delete
+from public.admin_profiles
+where user_id = '<auth_user_uuid>';
+```
+
+---
+
+# Supabase Connection Layer
+
+Browser client
+
+```
+lib/supabase/client.ts
+```
+
+SSR client
+
+```
+lib/supabase/server.ts
+```
+
+Admin client
+
+```
+lib/supabase/admin.ts
+```
+
+Middleware
+
+```
+proxy.ts
+lib/supabase/middleware.ts
+```
+
+Typed schema
+
+```
+types/database.ts
+```
+
+---
+
+# Supabase Verification
+
+Read-only verification
+
+```bash
+npm.cmd run supabase:check
+```
+
+Read, write and cleanup verification
+
+```bash
+npm.cmd run supabase:check:write
+```
+
+The write test inserts a temporary draft vehicle before automatically deleting it.
+
+---
+
+# Cloudinary Setup
+
+Configure:
+
+- Cloud Name
+- API Key
+- API Secret
+
+Vehicle images are uploaded directly to Cloudinary whenever credentials are available.
+
+Sync utility:
+
+```
+scripts/sync-cloudinary-vehicle-images.mjs
+```
+
+Documentation:
+
+```
+scripts/README-cloudinary-sync.md
+```
+
+---
+
+# Resend Setup
+
+Resend is optional.
+
+Without `RESEND_API_KEY`:
+
+- Forms continue saving successfully
+- Email notifications are skipped
+
+When email delivery is enabled:
+
+- Configure `RESEND_API_KEY`
+- Configure `ADMIN_NOTIFICATION_EMAIL`
+
+---
+
+# Verification Commands
+
+```bash
+npm.cmd run lint
+npm.cmd run typecheck
+npm.cmd run test
+npm.cmd run build
+```
+
+---
+
+# Deployment
+
+1. Push the repository to GitHub.
 2. Import the project into Vercel.
-3. Configure `NEXT_PUBLIC_SITE_URL`, Supabase, and Cloudinary environment variables.
-4. Add `ADMIN_NOTIFICATION_EMAIL`, and add `RESEND_API_KEY` only if email delivery is enabled.
-5. Run the Supabase migrations and optional seed.
-6. Deploy and validate inventory pages, forms, image sync, and admin login.
+3. Configure all required environment variables.
+4. Run the Supabase migrations.
+5. (Optional) Seed demo data.
+6. Deploy.
 
-## Release Smoke Test
-- `npm.cmd run lint`
-- `npm.cmd run typecheck`
-- `npm.cmd run test`
-- `npm.cmd run build`
-- `npm.cmd run test:e2e`
+After deployment verify:
 
-## Post-Deploy Checks
-- Confirm admin login and protected routes in Vercel.
-- Create and edit a vehicle from `/admin/vehicles`.
-- Verify row actions and bulk inventory actions update state correctly.
-- Confirm Cloudinary gallery images render on `/cars/[slug]` and after image sync.
-- Submit a viewing form and verify the lead appears in `/admin/leads`.
-- If Resend is still deferred, confirm forms save without email errors.
+- Inventory pages
+- Vehicle pages
+- Admin login
+- Forms
+- Cloudinary uploads
+- Image synchronization
 
-## Planning Docs
+---
+
+# Release Smoke Test
+
+```bash
+npm.cmd run lint
+npm.cmd run typecheck
+npm.cmd run test
+npm.cmd run build
+npm.cmd run test:e2e
+```
+
+---
+
+# Post Deployment Checklist
+
+- Verify admin authentication
+- Create and edit vehicles
+- Test row and bulk actions
+- Verify Cloudinary images
+- Submit a lead form
+- Verify lead appears in `/admin/leads`
+- Verify Resend notifications (if enabled)
+
+---
+
+# Project Documentation
+
 - [PLAN.md](./PLAN.md)
 - [DECISIONS.md](./DECISIONS.md)
-- [docs/01-project-scope.md](./docs/01-project-scope.md)
-- [docs/02-site-map.md](./docs/02-site-map.md)
-- [docs/03-user-flows.md](./docs/03-user-flows.md)
-- [docs/04-tech-stack.md](./docs/04-tech-stack.md)
-- [docs/05-database-schema.md](./docs/05-database-schema.md)
-- [docs/06-content-plan.md](./docs/06-content-plan.md)
-- [docs/07-seo-plan.md](./docs/07-seo-plan.md)
-- [docs/08-ui-ux-rules.md](./docs/08-ui-ux-rules.md)
-- [docs/09-feature-roadmap.md](./docs/09-feature-roadmap.md)
-- [docs/10-deployment-plan.md](./docs/10-deployment-plan.md)
-- [docs/11-admin-workflow.md](./docs/11-admin-workflow.md)
+- [Project Scope](./docs/01-project-scope.md)
+- [Site Map](./docs/02-site-map.md)
+- [User Flows](./docs/03-user-flows.md)
+- [Tech Stack](./docs/04-tech-stack.md)
+- [Database Schema](./docs/05-database-schema.md)
+- [Content Plan](./docs/06-content-plan.md)
+- [SEO Plan](./docs/07-seo-plan.md)
+- [UI / UX Rules](./docs/08-ui-ux-rules.md)
+- [Feature Roadmap](./docs/09-feature-roadmap.md)
+- [Deployment Plan](./docs/10-deployment-plan.md)
+- [Admin Workflow](./docs/11-admin-workflow.md)
